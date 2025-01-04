@@ -18,6 +18,7 @@ namespace SachidaPaudel.Models
         public DateTime TransactionDate { get; set; }
         public TransactionType TransactionTransactionType { get; set; }
         public string? Note { get; set; }
+
         public List<string> Tags { get; set; } = new List<string>();
 
         //// Default constructor
