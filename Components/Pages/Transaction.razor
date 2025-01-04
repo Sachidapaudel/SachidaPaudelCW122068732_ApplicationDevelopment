@@ -1,0 +1,118 @@
+﻿@page "/transaction"
+@using SachidaPaudel.Models
+@using SachidaPaudel.Service.TransactionService
+@inject ITransactionService TransactionService
+
+<h2 class="text-center my-4">Transaction Manager</h2>
+
+<div class="container">
+
+    <!-- Add New Transaction Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Add New Transaction</h5>
+        </div>
+        <div class="card-body">
+            <EditForm Model="newTransaction" OnValidSubmit="AddTransaction">
+                <div class="row gy-3">
+                    <div class="col-md-3">
+                        <InputText @bind-Value="newTransaction.TransactionTitle" class="form-control" placeholder="Title" required />
+                    </div>
+                    <div class="col-md-2">
+                        <InputNumber @bind-Value="newTransaction.TransactionAmount" class="form-control" placeholder="Amount" required />
+                    </div>
+                    <div class="col-md-2">
+                        <InputSelect @bind-Value="newTransaction.TransactionTransactionType" class="form-control">
+                            <option value="Credit">Credit</option>
+                            <option value="Debit">Debit</option>
+                            <option value="Debt">Debt</option>
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-3">
+                        <InputDate @bind-Value="newTransaction.TransactionDate" class="form-control" required />
+                    </div>
+                    <div class="col-md-2">
+                        <InputText @bind-Value="tagsInput" class="form-control" placeholder="Tags (comma separated)" />
+                    </div>
+                </div>
+                <div class="mt-3 text-end">
+                    <button type="submit" class="btn btn-primary">
+                        Add Transaction
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+
+    <!-- Display All Transactions Section -->
+    <div class="card">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Transaction List</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Title</th>
+                        <th>Amount</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Tags</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (transactions != null && transactions.Any())
+                    {
+                        foreach (var transaction in transactions)
+                        {
+                            <tr>
+                                <td>@transaction.TransactionTitle</td>
+                                <td>@transaction.TransactionAmount</td>
+                                <td>@transaction.TransactionTransactionType</td>
+                                <td>@transaction.TransactionDate.ToString("d")</td>
+                                <td>@string.Join(", ", transaction.Tags)</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center">No transactions available.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<SachidaPaudel.Models.Transaction> transactions = new List<SachidaPaudel.Models.Transaction>();
+    private SachidaPaudel.Models.Transaction newTransaction = new SachidaPaudel.Models.Transaction() { TransactionDate = DateTime.Now };
+    private string tagsInput = "";
+
+    protected override void OnInitialized()
+    {
+        transactions = TransactionService.GetTransactions(); // Fetch existing transactions
+    }
+
+    private void AddTransaction()
+    {
+        // Parse tags from the comma-separated input and remove leading/trailing spaces
+        newTransaction.Tags = tagsInput.Split(',')
+                                        .Select(tag => tag.Trim())
+                                        .ToList();
+
+        // Add the new transaction using the service
+        TransactionService.AddTransaction(newTransaction);
+
+        // Refresh the transaction list
+        transactions = TransactionService.GetTransactions();
+
+        // Reset form fields after adding the transaction
+        newTransaction = new SachidaPaudel.Models.Transaction() { TransactionDate = DateTime.Now };
+        tagsInput = "";
+    }
+}
+
+

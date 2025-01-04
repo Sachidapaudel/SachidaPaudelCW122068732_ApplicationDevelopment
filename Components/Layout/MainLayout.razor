@@ -1,17 +1,55 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+@inject SachidaPaudel.Service.UserService.IUserService UserService
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@if (!_isInitialized)
+{
+        <p>Loading...</p>
+}
+else
+{
+        <div class="page">
+        @if (UserService.IsUserLoggedIn && !IsLoginOrRegisterPage())
+        {
+                    <div class="sidebar">
+                        <NavMenu />
+                    </div>
+        }
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            <main>
+            @if (UserService.IsUserLoggedIn && !IsLoginOrRegisterPage())
+            {
+                        <div class="top-row px-4">
+                            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+                        </div>
+            }
+
+                <article class="content px-4">
+                @Body
+                </article>
+            </main>
         </div>
+}
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+@code {
+    private bool _isInitialized = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Redirect to the register page if not logged in and not already on the register or login page
+        if (!UserService.IsUserLoggedIn && !IsLoginOrRegisterPage())
+        {
+            Navigation.NavigateTo("/register", true);
+        }
+        else
+        {
+            _isInitialized = true;
+        }
+    }
+
+    private bool IsLoginOrRegisterPage()
+    {
+        var currentUri = Navigation.Uri.ToLower();
+        return currentUri.Contains("login") || currentUri.Contains("register");
+    }
+}
