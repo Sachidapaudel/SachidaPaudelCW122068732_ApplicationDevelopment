@@ -9,24 +9,30 @@ namespace SachidaPaudel.Service.TransactionService
 {
     public class TransactionService : ITransactionService
     {
-        private readonly List<Transaction> _transactions = new();
+        private readonly List<Transaction> _transactions;
         private readonly CsvHelper _csvHelper;
+        private int _nextTransactionId;
 
         public TransactionService(CsvHelper csvHelper)
         {
-            _csvHelper = csvHelper;
-            _transactions = _csvHelper.LoadTransactions();
+            _csvHelper = csvHelper ?? throw new ArgumentNullException(nameof(csvHelper));
+            _transactions = _csvHelper.LoadTransactions() ?? new List<Transaction>();
+            _nextTransactionId = _transactions.Any() ? _transactions.Max(t => t.TransactionId) + 1 : 1;
         }
 
         public async Task AddTransactionAsync(Transaction transaction)
         {
-            if (transaction == null) throw new ArgumentNullException(nameof(transaction));
+            if (transaction == null)
+                throw new ArgumentNullException(nameof(transaction));
 
-            // Handle transaction types
+            // Assign a unique ID to the transaction
+            transaction.TransactionId = _nextTransactionId++;
+
+            // Adjust balance based on transaction type
             switch (transaction.TransactionTransactionType)
             {
                 case TransactionType.Credit:
-                    // Directly add credit transactions
+                    // No balance check needed for credit transactions
                     break;
 
                 case TransactionType.Debit:
@@ -36,15 +42,17 @@ namespace SachidaPaudel.Service.TransactionService
                     break;
 
                 case TransactionType.Debt:
-                    // Debt transactions don't immediately affect balance
+                    // Debts can be added without immediate balance impact
                     break;
 
                 default:
                     throw new InvalidOperationException("Invalid transaction type.");
             }
 
-            // Add transaction to list and save to CSV
+            // Add the transaction to the in-memory list
             _transactions.Add(transaction);
+
+            // Save the transaction to the storage
             await Task.Run(() => _csvHelper.SaveTransaction(transaction));
         }
 
@@ -55,14 +63,22 @@ namespace SachidaPaudel.Service.TransactionService
 
         public async Task<List<Transaction>> SearchTransactionsAsync(string title, string transactionType, List<string> tags, DateTime? startDate, DateTime? endDate, string sortBy, bool ascending)
         {
-            var transactions = await Task.FromResult(_transactions);
-            var filteredTransactions = transactions.Where(t =>
-                (string.IsNullOrEmpty(title) || t.TransactionTitle.Contains(title, StringComparison.OrdinalIgnoreCase)) &&
-                (string.IsNullOrEmpty(transactionType) || t.TransactionTransactionType.ToString().Equals(transactionType, StringComparison.OrdinalIgnoreCase)) &&
-                (tags == null || tags.Count == 0 || t.Tags.Any(tag => tags.Contains(tag))) &&
-                (!startDate.HasValue || t.TransactionDate >= startDate.Value) &&
-                (!endDate.HasValue || t.TransactionDate <= endDate.Value)
-            );
+            var filteredTransactions = _transactions.AsEnumerable();
+
+            if (!string.IsNullOrEmpty(title))
+                filteredTransactions = filteredTransactions.Where(t => t.TransactionTitle.Contains(title, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(transactionType) && Enum.TryParse<TransactionType>(transactionType, true, out var type))
+                filteredTransactions = filteredTransactions.Where(t => t.TransactionTransactionType == type);
+
+            if (tags != null && tags.Any())
+                filteredTransactions = filteredTransactions.Where(t => t.Tags != null && t.Tags.Intersect(tags).Any());
+
+            if (startDate.HasValue)
+                filteredTransactions = filteredTransactions.Where(t => t.TransactionDate >= startDate.Value);
+
+            if (endDate.HasValue)
+                filteredTransactions = filteredTransactions.Where(t => t.TransactionDate <= endDate.Value);
 
             filteredTransactions = sortBy switch
             {
@@ -72,37 +88,65 @@ namespace SachidaPaudel.Service.TransactionService
                 _ => filteredTransactions
             };
 
-            return filteredTransactions.ToList();
+            return await Task.FromResult(filteredTransactions.ToList());
         }
 
         public async Task<List<Transaction>> GetTopTransactionsAsync(int count, bool highest = true)
         {
-            var transactions = await Task.FromResult(_transactions);
-            return highest
-                ? transactions.OrderByDescending(t => t.TransactionAmount).Take(count).ToList()
-                : transactions.OrderBy(t => t.TransactionAmount).Take(count).ToList();
+            var sortedTransactions = highest
+                ? _transactions.OrderByDescending(t => t.TransactionAmount)
+                : _transactions.OrderBy(t => t.TransactionAmount);
+
+            return await Task.FromResult(sortedTransactions.Take(count).ToList());
         }
 
         public async Task<decimal> GetUserBalanceAsync()
         {
-            // Calculate the balance using transactions
-            var totalCredits = _transactions
+            var credit = _transactions
                 .Where(t => t.TransactionTransactionType == TransactionType.Credit)
                 .Sum(t => t.TransactionAmount);
 
-            var totalDebit = _transactions
+            var debit = _transactions
                 .Where(t => t.TransactionTransactionType == TransactionType.Debit)
                 .Sum(t => t.TransactionAmount);
 
-            var balance = totalCredits - totalDebit;
-
-            return await Task.FromResult(balance);
+            return await Task.FromResult(credit - debit);
         }
 
         public async Task<List<Transaction>> GetPendingDebtsAsync()
         {
-            return await Task.FromResult(
-                _transactions.Where(t => t.TransactionTransactionType == TransactionType.Debt && t.TransactionDate > DateTime.Now).ToList());
+            var pendingDebts = _transactions
+                .Where(t => t.TransactionTransactionType == TransactionType.Debt && t.TransactionDate > DateTime.Now)
+                .ToList();
+
+            return await Task.FromResult(pendingDebts);
+        }
+
+        public async Task UpdateTransactionAsync(Transaction transaction)
+        {
+            var existingTransaction = _transactions.FirstOrDefault(t => t.TransactionId == transaction.TransactionId);
+            if (existingTransaction != null)
+            {
+                _transactions.Remove(existingTransaction);
+                _transactions.Add(transaction);
+                await Task.Run(() => _csvHelper.UpdateTransaction(transaction));
+            }
+        }
+
+        public async Task DeleteTransactionAsync(int transactionId)
+        {
+            var transaction = _transactions.FirstOrDefault(t => t.TransactionId == transactionId);
+            if (transaction != null)
+            {
+                _transactions.Remove(transaction);
+                await Task.Run(() => _csvHelper.DeleteTransaction(transactionId));
+            }
+        }
+        public async Task<List<string>> GetExistingTagsAsync()
+        {
+            var transactions = await GetTransactionsAsync();
+            return transactions.SelectMany(t => t.Tags).Distinct().ToList();
         }
     }
 }
+

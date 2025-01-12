@@ -1,6 +1,138 @@
 ﻿@page "/"
+@using SachidaPaudel.Service.TransactionService
+@using SachidaPaudel.Service.DebtsService
+@using SachidaPaudel.Models
+@inject ITransactionService TransactionService
+@inject IDebtsService DebtService
 
-<h1>Dashboard</h1>
+<div class="container mt-5">
+    <!-- Dashboard Header -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">💰 TRACK IT Dashboard</h1>
+        <p class="text-muted">Your financial summary at a glance.</p>
+    </div>
 
-Welcome to your new app.
-    
+    <!-- Summary Cards -->
+    <div class="row text-center mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">Total Cash Inflows</h5>
+                    <h3 class="fw-bold">@totalCashInflows.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">Total Cash Outflows</h5>
+                    <h3 class="fw-bold">@totalCashOutflows.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">Remaining Debts</h5>
+                    <h3 class="fw-bold">@remainingDebts.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debts Section -->
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-body">
+                    <h5 class="card-title">Cleared Debts</h5>
+                    <h4 class="fw-bold text-success">@clearedDebts.ToString("C")</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Debts</h5>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var debt in pendingDebts)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @debt.DebtSource
+                                <span class="badge bg-danger">@debt.DebtAmount.ToString("C")</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions Section -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow border-0">
+                <div class="card-body">
+                    <h5 class="card-title">Top 5 Highest Transactions</h5>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var transaction in topHighestTransactions)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @transaction.TransactionTitle
+                                <span class="badge bg-success">@transaction.TransactionAmount.ToString("C")</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow border-0">
+                <div class="card-body">
+                    <h5 class="card-title">Top 5 Lowest Transactions</h5>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var transaction in topLowestTransactions)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @transaction.TransactionTitle
+                                <span class="badge bg-secondary">@transaction.TransactionAmount.ToString("C")</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private decimal totalCashInflows;
+    private decimal totalCashOutflows;
+    private decimal totalDebts;
+    private decimal clearedDebts;
+    private decimal remainingDebts;
+    private List<SachidaPaudel.Models.Debts> pendingDebts = new List<SachidaPaudel.Models.Debts>();
+    private List<SachidaPaudel.Models.Transaction> topHighestTransactions = new List<SachidaPaudel.Models.Transaction>();
+    private List<SachidaPaudel.Models.Transaction> topLowestTransactions = new List<SachidaPaudel.Models.Transaction>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboardData();
+    }
+
+    private async Task LoadDashboardData()
+    {
+        var transactions = await TransactionService.GetTransactionsAsync();
+        totalCashInflows = transactions.Where(t => t.TransactionTransactionType == TransactionType.Credit).Sum(t => t.TransactionAmount);
+        totalCashOutflows = transactions.Where(t => t.TransactionTransactionType == TransactionType.Debit).Sum(t => t.TransactionAmount);
+
+        var debts = await DebtService.GetDebtsAsync();
+        totalDebts = debts.Sum(d => d.DebtAmount);
+        clearedDebts = debts.Where(d => d.IsCleared).Sum(d => d.DebtAmount);
+        remainingDebts = totalDebts - clearedDebts;
+        pendingDebts = debts.Where(d => d.IsPending).ToList();
+
+        topHighestTransactions = await TransactionService.GetTopTransactionsAsync(5, highest: true);
+        topLowestTransactions = await TransactionService.GetTopTransactionsAsync(5, highest: false);
+    }
+}

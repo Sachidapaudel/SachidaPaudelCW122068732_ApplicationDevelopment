@@ -7,15 +7,17 @@ using SachidaPaudel.Models;
 
 namespace SachidaPaudel.Service.TransactionService
 {
-    internal interface ITransactionService
+    public interface ITransactionService
     {
         Task AddTransactionAsync(Transaction transaction);
         Task<List<Transaction>> GetTransactionsAsync();
-        Task<List<Transaction>> SearchTransactionsAsync( string Transactiontitle, string TransactionType, List<string> Tags, DateTime? startDate, DateTime? endDate, string sortBy, bool ascending);
-        Task<List<Transaction>> GetTopTransactionsAsync( int count, bool highest = true);
+        Task<List<Transaction>> SearchTransactionsAsync(string title, string transactionType, List<string> tags, DateTime? startDate, DateTime? endDate, string sortBy, bool ascending);
+        Task<List<Transaction>> GetTopTransactionsAsync(int count, bool highest = true);
         Task<decimal> GetUserBalanceAsync();
         Task<List<Transaction>> GetPendingDebtsAsync();
-
+        Task UpdateTransactionAsync(Transaction transaction); // Add this method
+        Task DeleteTransactionAsync(int transactionId); // Add this method
+        Task<List<string>> GetExistingTagsAsync(); // Add this method
     }
 }
 

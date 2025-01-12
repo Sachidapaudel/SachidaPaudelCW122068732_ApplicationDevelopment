@@ -4,160 +4,276 @@
 @inject ITransactionService TransactionService
 
 <h2 class="text-center my-4">Transaction Manager</h2>
-<div class="user-balance">
-    <h4>Total Balance: @userBalance.ToString("C")</h4>
+
+<!-- User Balance Section -->
+<div class="alert alert-info text-center mb-4">
+    <strong>Total Balance:</strong> @userBalance.ToString("C")
 </div>
 
-<!-- Display Pending Debts -->
-<div class="pending-debts">
-    <h4>Pending Debts</h4>
-    <ul>
-        @foreach (var debt in pendingDebts)
-        {
-            <li>@debt.TransactionTitle - Date: @debt.TransactionDate.ToString("MM/dd/yyyy")</li>
-        }
-    </ul>
-</div>
-<div class="search-transactions">
-    <h4>Search Transactions</h4>
-    <EditForm Model="searchCriteria" OnValidSubmit="SearchTransactionsAsync">
-        <div class="row">
-            <div class="col">
-                <InputText @bind-Value="searchCriteria.Title" class="form-control" placeholder="Title" />
-            </div>
-            <div class="col">
-                <InputSelect @bind-Value="searchCriteria.TransactionType" class="form-control">
-                    <option value="">All Types</option>
-                    <option value="Credit">Credit</option>
-                    <option value="Debit">Debit</option>
-                    <option value="Debt">Debt</option>
-                </InputSelect>
-            </div>
-            <div class="col">
-                <InputText @bind-Value="searchCriteria.Tags" class="form-control" placeholder="Tags (comma separated)" />
-            </div>
-            <div class="col">
-                <InputDate @bind-Value="searchCriteria.StartDate" class="form-control" />
-            </div>
-            <div class="col">
-                <InputDate @bind-Value="searchCriteria.EndDate" class="form-control" />
-            </div>
-            <div class="col">
-                <InputSelect @bind-Value="searchCriteria.SortBy" class="form-control">
-                    <option value="Date">Date</option>
-                    <option value="Title">Title</option>
-                    <option value="Amount">Amount</option>
-                </InputSelect>
-            </div>
-            <div class="col">
-                <InputSelect @bind-Value="searchCriteria.Ascending" class="form-control">
-                    <option value="true">Ascending</option>
-                    <option value="false">Descending</option>
-                </InputSelect>
-            </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary">Search</button>
-            </div>
-            <div class="col-auto">
-                <button type="button" class="btn btn-secondary" @onclick="ClearSearchFilters">Clear</button>
-            </div>
-        </div>
-    </EditForm>
-</div>
 
-<div class="container">
-
-    <!-- Add New Transaction Section -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Add New Transaction</h5>
-        </div>
-        <div class="card-body">
-            <EditForm Model="newTransaction" OnValidSubmit="AddTransaction">
-                <div class="row gy-3">
-                    <div class="col-md-3">
-                        <InputText @bind-Value="newTransaction.TransactionTitle" class="form-control" placeholder="Title" required />
-                    </div>
-                    <div class="col-md-2">
-                        <InputNumber @bind-Value="newTransaction.TransactionAmount" class="form-control" placeholder="Amount" required />
-                    </div>
-                    <div class="col-md-2">
-                        <InputSelect @bind-Value="newTransaction.TransactionTransactionType" class="form-control">
-                            <option value="Credit">Credit</option>
-                            <option value="Debit">Debit</option>
-                            <option value="Debt">Debt</option>
-                        </InputSelect>
-                    </div>
-                    <div class="col-md-3">
-                        <InputDate @bind-Value="newTransaction.TransactionDate" class="form-control" required />
-                    </div>
-                    <div class="col-md-2">
-                        <InputText @bind-Value="tagsInput" class="form-control" placeholder="Tags (comma separated)" />
-                    </div>
-                    <div class="col-md-12">
-                        <InputText @bind-Value="newTransaction.Note" class="form-control" placeholder="Notes" />
-                    </div>
-                </div>
-                <div class="mt-3 text-end">
-                    <button type="submit" class="btn btn-primary">
-                        Add Transaction
-                    </button>
-                </div>
-            </EditForm>
-        </div>
+<!-- Search Transactions Section -->
+<div class="card mb-4">
+    <div class="card-header bg-light text-dark">
+        <h5 class="mb-0">Search Transactions</h5>
     </div>
+    <div class="card-body">
+        <EditForm Model="searchCriteria" OnValidSubmit="SearchTransactionsAsync">
+            <div class="row gy-2">
+                <div class="col-md-3">
+                    <InputText @bind-Value="searchCriteria.Title" class="form-control" placeholder="Title" />
+                </div>
+                <div class="col-md-2">
+                    <InputSelect @bind-Value="searchCriteria.TransactionType" class="form-control">
+                        <option value="">All Types</option>
+                        <option value="Credit">Credit</option>
+                        <option value="Debit">Debit</option>
+                        <option value="Debt">Debt</option>
+                    </InputSelect>
+                </div>
+                <div class="col-md-3">
+                    <InputText @bind-Value="searchCriteria.Tags" class="form-control" placeholder="Tags (comma separated)" />
+                </div>
+                <div class="col-md-2">
+                    <InputDate @bind-Value="searchCriteria.StartDate" class="form-control" />
+                </div>
+                <div class="col-md-2">
+                    <InputDate @bind-Value="searchCriteria.EndDate" class="form-control" />
+                </div>
+            </div>
+            <div class="row gy-2 mt-2">
+                <div class="col-md-2">
+                    <InputSelect @bind-Value="searchCriteria.SortBy" class="form-control">
+                        <option value="Date">Date</option>
+                        <option value="Title">Title</option>
+                        <option value="Amount">Amount</option>
+                    </InputSelect>
+                </div>
+                <div class="col-md-2">
+                    <InputSelect @bind-Value="searchCriteria.Ascending" class="form-control">
+                        <option value="true">Ascending</option>
+                        <option value="false">Descending</option>
+                    </InputSelect>
+                </div>
+                <div class="col-md-4 d-flex align-items-center">
+                    <button type="submit" class="btn btn-primary me-2">Search</button>
+                    <button type="button" class="btn btn-secondary" @onclick="ClearSearchFilters">Clear</button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+</div>
 
-    <!-- Display All Transactions Section -->
-    <div class="card">
-        <div class="card-header bg-secondary text-white">
-            <h5 class="mb-0">Transaction List</h5>
-        </div>
-        <div class="card-body">
-            <table class="table table-striped">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Title</th>
-                        <th>Amount</th>
-                        <th>Type</th>
-                        <th>Date</th>
-                        <th>Tags</th>
-                        <th>Notes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (transactions != null && transactions.Any())
-                    {
-                        foreach (var transaction in transactions)
-                        {
-                            <tr>
-                                <td>@transaction.TransactionTitle</td>
-                                <td>@transaction.TransactionAmount</td>
-                                <td>@transaction.TransactionTransactionType</td>
-                                <td>@transaction.TransactionDate.ToString("d")</td>
-                                <td>@string.Join(", ", transaction.Tags)</td>
-                                <td>@transaction.Note</td>
-                            </tr>
-                        }
-                    }
-                    else
+<!-- Add New Transaction Button -->
+<div class="text-end mb-4">
+    <button class="btn btn-success" @onclick="OpenAddTransactionModal">Add Transaction</button>
+</div>
+
+<!-- Transaction List Section -->
+<div class="card">
+    <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0">Transaction List</h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Title</th>
+                    <th>Amount</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Tags</th>
+                    <th>Notes</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (transactions != null && transactions.Any())
+                {
+                    @foreach (var transaction in transactions)
                     {
                         <tr>
-                            <td colspan="6" class="text-center">No transactions available.</td>
+                            <td>@transaction.TransactionTitle</td>
+                            <td>@transaction.TransactionAmount.ToString("C")</td>
+                            <td>@transaction.TransactionTransactionType</td>
+                            <td>@transaction.TransactionDate.ToString("MM/dd/yyyy")</td>
+                            <td>@string.Join(", ", transaction.Tags)</td>
+                            <td>@transaction.Note</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" @onclick="() => EditTransaction(transaction)">Edit</button>
+                                <button class="btn btn-danger btn-sm" @onclick="() => DeleteTransaction(transaction.TransactionId)">Delete</button>
+                            </td>
                         </tr>
                     }
-                </tbody>
-            </table>
-        </div>
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">No transactions available.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
+
+<!-- Add Transaction Modal -->
+@if (isAddModalVisible)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Transaction</h5>
+                    <button type="button" class="btn-close" @onclick="CloseAddTransactionModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="newTransaction" OnValidSubmit="AddTransaction">
+                        <div class="mb-3">
+                            <label for="addTitle" class="form-label">Title</label>
+                            <InputText id="addTitle" @bind-Value="newTransaction.TransactionTitle" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="addAmount" class="form-label">Amount</label>
+                            <InputNumber id="addAmount" @bind-Value="newTransaction.TransactionAmount" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="addType" class="form-label">Type</label>
+                            <InputSelect id="addType" @bind-Value="newTransaction.TransactionTransactionType" class="form-control">
+                                <option value="Credit">Credit</option>
+                                <option value="Debit">Debit</option>
+                                <option value="Debt">Debt</option>
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addDate" class="form-label">Date</label>
+                            <InputDate id="addDate" @bind-Value="newTransaction.TransactionDate" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="existingTags" class="form-label">Existing Tags</label>
+                            <InputSelect id="existingTags" @bind-Value="selectedExistingTag" class="form-control">
+                                <option value="">Select a tag</option>
+                                <option value="Yearly">Yearly</option>
+                                <option value="Monthly">Monthly</option>
+                                <option value="Food">Food</option>
+                                <option value="Drinks">Drinks</option>
+                                <option value="Clothes">Clothes</option>
+                                <option value="Gadgets">Gadgets</option>
+                                <option value="Miscellaneous">Miscellaneous</option>
+                                <option value="Fuel">Fuel</option>
+                                <option value="Rent">Rent</option>
+                                <option value="EMI">EMI</option>
+                                <option value="Party">Party</option>
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addTags" class="form-label">Custom Tags</label>
+                            <InputText id="addTags" @bind-Value="customTagInput" class="form-control" placeholder="Tags (comma separated)" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="addNote" class="form-label">Notes</label>
+                            <InputText id="addNote" @bind-Value="newTransaction.Note" class="form-control" />
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">Add Transaction</button>
+                            <button type="button" class="btn btn-secondary" @onclick="CloseAddTransactionModal">Cancel</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Edit Transaction Modal -->
+@if (isEditModalVisible)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Transaction</h5>
+                    <button type="button" class="btn-close" @onclick="CloseEditModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="editTransaction" OnValidSubmit="UpdateTransaction">
+                        <div class="mb-3">
+                            <label for="editTitle" class="form-label">Title</label>
+                            <InputText id="editTitle" @bind-Value="editTransaction.TransactionTitle" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="editAmount" class="form-label">Amount</label>
+                            <InputNumber id="editAmount" @bind-Value="editTransaction.TransactionAmount" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="editType" class="form-label">Type</label>
+                            <InputSelect id="editType" @bind-Value="editTransaction.TransactionTransactionType" class="form-control">
+                                <option value="Credit">Credit</option>
+                                <option value="Debit">Debit</option>
+                                <option value="Debt">Debt</option>
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDate" class="form-label">Date</label>
+                            <InputDate id="editDate" @bind-Value="editTransaction.TransactionDate" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTags" class="form-label">Tags</label>
+                            <InputText id="editTags" @bind-Value="editTagsInput" class="form-control" placeholder="Tags (comma separated)" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="editNote" class="form-label">Notes</label>
+                            <InputText id="editNote" @bind-Value="editTransaction.Note" class="form-control" />
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <button type="button" class="btn btn-secondary" @onclick="CloseEditModal">Cancel</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Insufficient Balance Modal -->
+@if (isInsufficientBalanceModalVisible)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Insufficient Balance</h5>
+                    <button type="button" class="btn-close" @onclick="CloseInsufficientBalanceModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>You do not have sufficient balance to complete this transaction.</p>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseInsufficientBalanceModal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     private List<SachidaPaudel.Models.Transaction> transactions = new List<SachidaPaudel.Models.Transaction>();
     private SachidaPaudel.Models.Transaction newTransaction = new SachidaPaudel.Models.Transaction() { TransactionDate = DateTime.Now };
+    private SachidaPaudel.Models.Transaction editTransaction = new SachidaPaudel.Models.Transaction();
     private List<SachidaPaudel.Models.Transaction> pendingDebts = new List<SachidaPaudel.Models.Transaction>();
+    private List<string> existingTags = new List<string>
+    {
+        "Yearly", "Monthly", "Food", "Drinks", "Clothes", "Gadgets", "Miscellaneous", "Fuel", "Rent", "EMI", "Party"
+    }; // List of existing tags
+    private string selectedExistingTag = "";
+    private string customTagInput = "";
     private string tagsInput = "";
+    private string editTagsInput = "";
     private decimal userBalance;
     private SearchCriteria searchCriteria = new SearchCriteria();
+    private bool isAddModalVisible = false;
+    private bool isEditModalVisible = false;
+    private bool isInsufficientBalanceModalVisible = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -166,12 +282,41 @@
         pendingDebts = await TransactionService.GetPendingDebtsAsync(); // Fetch pending debts
     }
 
+    private void OpenAddTransactionModal()
+    {
+        isAddModalVisible = true;
+    }
+
+    private void CloseAddTransactionModal()
+    {
+        isAddModalVisible = false;
+    }
+
+    private void CloseInsufficientBalanceModal()
+    {
+        isInsufficientBalanceModalVisible = false;
+    }
+
     private async Task AddTransaction()
     {
-        // Parse tags from the comma-separated input and remove leading/trailing spaces
-        newTransaction.Tags = tagsInput.Split(',')
-                                        .Select(tag => tag.Trim())
-                                        .ToList();
+        // Combine selected existing tag and custom tags
+        var tags = new List<string>();
+        if (!string.IsNullOrEmpty(selectedExistingTag))
+        {
+            tags.Add(selectedExistingTag);
+        }
+        if (!string.IsNullOrEmpty(customTagInput))
+        {
+            tags.AddRange(customTagInput.Split(',').Select(tag => tag.Trim()));
+        }
+        newTransaction.Tags = tags;
+
+        // Check for sufficient balance for outflows
+        if (newTransaction.TransactionTransactionType == TransactionType.Debit && newTransaction.TransactionAmount > userBalance)
+        {
+            isInsufficientBalanceModalVisible = true;
+            return;
+        }
 
         try
         {
@@ -181,16 +326,68 @@
             // Refresh the transaction list and user balance
             transactions = await TransactionService.GetTransactionsAsync();
             userBalance = await TransactionService.GetUserBalanceAsync();
+            pendingDebts = await TransactionService.GetPendingDebtsAsync(); // Refresh pending debts
 
             // Reset form fields after adding the transaction
             newTransaction = new SachidaPaudel.Models.Transaction() { TransactionDate = DateTime.Now };
-            tagsInput = "";
+            selectedExistingTag = "";
+            customTagInput = "";
+            CloseAddTransactionModal();
         }
         catch (InvalidOperationException ex)
         {
             // Handle exception or display error message
             Console.WriteLine(ex.Message);
         }
+    }
+
+    private async Task UpdateTransaction()
+    {
+        // Parse tags from the comma-separated input and remove leading/trailing spaces
+        editTransaction.Tags = editTagsInput.Split(',')
+                                            .Select(tag => tag.Trim())
+                                            .ToList();
+
+        try
+        {
+            // Update the transaction using the service
+            await TransactionService.UpdateTransactionAsync(editTransaction);
+
+            // Refresh the transaction list and user balance
+            transactions = await TransactionService.GetTransactionsAsync();
+            userBalance = await TransactionService.GetUserBalanceAsync();
+            pendingDebts = await TransactionService.GetPendingDebtsAsync(); // Refresh pending debts
+
+            // Close the edit modal
+            CloseEditModal();
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Handle exception or display error message
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task DeleteTransaction(int transactionId)
+    {
+        await TransactionService.DeleteTransactionAsync(transactionId);
+
+        // Refresh the transaction list and user balance
+        transactions = await TransactionService.GetTransactionsAsync();
+        userBalance = await TransactionService.GetUserBalanceAsync();
+        pendingDebts = await TransactionService.GetPendingDebtsAsync(); // Refresh pending debts
+    }
+
+    private void EditTransaction(SachidaPaudel.Models.Transaction transaction)
+    {
+        editTransaction = transaction;
+        editTagsInput = string.Join(", ", transaction.Tags);
+        isEditModalVisible = true;
+    }
+
+    private void CloseEditModal()
+    {
+        isEditModalVisible = false;
     }
 
     private async Task SearchTransactionsAsync()
@@ -215,12 +412,13 @@
 
     private class SearchCriteria
     {
-        public string Title { get; set; }
-        public string TransactionType { get; set; }
-        public string Tags { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string TransactionType { get; set; } = string.Empty;
+        public string Tags { get; set; } = string.Empty;
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string SortBy { get; set; } = "Date";
         public bool Ascending { get; set; } = true;
     }
 }
+

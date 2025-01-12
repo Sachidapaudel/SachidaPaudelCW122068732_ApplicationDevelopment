@@ -10,5 +10,6 @@ namespace SachidaPaudel.Service.DebtsService
         Task<List<Debts>> GetDebtsAsync();
         Task ClearDebtAsync(int debtId, decimal cashInflows);
         Task<List<Debts>> SearchDebtsAsync(string source, DateTime? startDate, DateTime? endDate);
+
     }
 }

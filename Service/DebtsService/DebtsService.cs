@@ -9,7 +9,7 @@ namespace SachidaPaudel.Service.DebtsService
 {
     public class DebtsService : IDebtsService
     {
-        private readonly List<Debts> _debts = new();
+        private readonly List<Debts> _debts;
         private readonly CsvHelper _csvHelper;
 
         public DebtsService(CsvHelper csvHelper)
@@ -20,15 +20,17 @@ namespace SachidaPaudel.Service.DebtsService
 
         public async Task AddDebtAsync(Debts debt)
         {
+            if (debt == null) throw new ArgumentNullException(nameof(debt));
+
             // Simulate async addition of debt
             await Task.Run(() => _debts.Add(debt));
-            _csvHelper.SaveDebt(debt);
+            _csvHelper.SaveDebts(_debts); // Save all debts to CSV
         }
 
         public async Task<List<Debts>> GetDebtsAsync()
         {
             // Simulate async retrieval of all debts
-            return await Task.Run(() => _debts.ToList());
+            return await Task.FromResult(_debts.ToList());
         }
 
         public async Task ClearDebtAsync(int debtId, decimal cashInflows)
@@ -38,7 +40,7 @@ namespace SachidaPaudel.Service.DebtsService
             if (debt != null)
             {
                 debt.ClearDebt(cashInflows);
-                _csvHelper.SaveDebt(debt);
+                _csvHelper.SaveDebts(_debts); // Save all debts to CSV
             }
             else
             {
@@ -56,3 +58,4 @@ namespace SachidaPaudel.Service.DebtsService
         }
     }
 }
+
