@@ -147,6 +147,11 @@ namespace SachidaPaudel.Service.TransactionService
             var transactions = await GetTransactionsAsync();
             return transactions.SelectMany(t => t.Tags).Distinct().ToList();
         }
+
+        public Task<List<Transaction>> GetTopTransactionsAsync(int count, bool highest = true, DateTime? startDate = null, DateTime? endDate = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

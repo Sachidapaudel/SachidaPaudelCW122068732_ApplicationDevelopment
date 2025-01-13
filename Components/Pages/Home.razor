@@ -12,6 +12,22 @@
         <p class="text-muted">Your financial summary at a glance.</p>
     </div>
 
+    <!-- Date Range Filter -->
+    <div class="row mb-4">
+        <div class="col-md-5">
+            <label for="startDate" class="form-label">Start Date</label>
+            <InputDate id="startDate" @bind-Value="searchCriteria.StartDate" class="form-control" />
+        </div>
+        <div class="col-md-5">
+            <label for="endDate" class="form-label">End Date</label>
+            <InputDate id="endDate" @bind-Value="searchCriteria.EndDate" class="form-control" />
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button class="btn btn-primary me-2" @onclick="LoadDashboardData">Filter</button>
+            <button class="btn btn-secondary" @onclick="ClearFilters">Clear</button>
+        </div>
+    </div>
+
     <!-- Summary Cards -->
     <div class="row text-center mb-5">
         <div class="col-md-4 mb-4">
@@ -35,6 +51,78 @@
                 <div class="card-body">
                     <h5 class="card-title text-warning">Remaining Debts</h5>
                     <h3 class="fw-bold">@remainingDebts.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Highest/Lowest Inflow and Outflow -->
+    <div class="row text-center mb-5">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Highest Inflow</h5>
+                    @if (highestInflow != null)
+                    {
+                        <h3 class="fw-bold">@highestInflow.TransactionAmount.ToString("C")</h3>
+                        <p class="text-muted">@highestInflow.TransactionTitle</p>
+                        <p class="text-muted">@highestInflow.TransactionDate.ToString("d")</p>
+                    }
+                    else
+                    {
+                        <h3 class="fw-bold">N/A</h3>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">Highest Outflow</h5>
+                    @if (highestOutflow != null)
+                    {
+                        <h3 class="fw-bold">@highestOutflow.TransactionAmount.ToString("C")</h3>
+                        <p class="text-muted">@highestOutflow.TransactionTitle</p>
+                        <p class="text-muted">@highestOutflow.TransactionDate.ToString("d")</p>
+                    }
+                    else
+                    {
+                        <h3 class="fw-bold">N/A</h3>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Lowest Inflow</h5>
+                    @if (lowestInflow != null)
+                    {
+                        <h3 class="fw-bold">@lowestInflow.TransactionAmount.ToString("C")</h3>
+                        <p class="text-muted">@lowestInflow.TransactionTitle</p>
+                        <p class="text-muted">@lowestInflow.TransactionDate.ToString("d")</p>
+                    }
+                    else
+                    {
+                        <h3 class="fw-bold">N/A</h3>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">Lowest Outflow</h5>
+                    @if (lowestOutflow != null)
+                    {
+                        <h3 class="fw-bold">@lowestOutflow.TransactionAmount.ToString("C")</h3>
+                        <p class="text-muted">@lowestOutflow.TransactionTitle</p>
+                        <p class="text-muted">@lowestOutflow.TransactionDate.ToString("d")</p>
+                    }
+                    else
+                    {
+                        <h3 class="fw-bold">N/A</h3>
+                    }
                 </div>
             </div>
         </div>
@@ -78,7 +166,11 @@
                         @foreach (var transaction in topHighestTransactions)
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                @transaction.TransactionTitle
+                                <div>
+                                    @transaction.TransactionTitle
+                                    <br />
+                                    <small class="text-muted">@transaction.TransactionDate.ToString("d")</small>
+                                </div>
                                 <span class="badge bg-success">@transaction.TransactionAmount.ToString("C")</span>
                             </li>
                         }
@@ -94,7 +186,11 @@
                         @foreach (var transaction in topLowestTransactions)
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                @transaction.TransactionTitle
+                                <div>
+                                    @transaction.TransactionTitle
+                                    <br />
+                                    <small class="text-muted">@transaction.TransactionDate.ToString("d")</small>
+                                </div>
                                 <span class="badge bg-secondary">@transaction.TransactionAmount.ToString("C")</span>
                             </li>
                         }
@@ -114,15 +210,29 @@
     private List<SachidaPaudel.Models.Debts> pendingDebts = new List<SachidaPaudel.Models.Debts>();
     private List<SachidaPaudel.Models.Transaction> topHighestTransactions = new List<SachidaPaudel.Models.Transaction>();
     private List<SachidaPaudel.Models.Transaction> topLowestTransactions = new List<SachidaPaudel.Models.Transaction>();
+    private SachidaPaudel.Models.Transaction? highestInflow;
+    private SachidaPaudel.Models.Transaction? highestOutflow;
+    private SachidaPaudel.Models.Transaction? lowestInflow;
+    private SachidaPaudel.Models.Transaction? lowestOutflow;
+    private SearchCriteria searchCriteria = new SearchCriteria();
 
     protected override async Task OnInitializedAsync()
     {
+        SetDefaultDates();
         await LoadDashboardData();
+    }
+
+    private void SetDefaultDates()
+    {
+        searchCriteria.StartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+        searchCriteria.EndDate = searchCriteria.StartDate.Value.AddMonths(1).AddDays(-1);
     }
 
     private async Task LoadDashboardData()
     {
         var transactions = await TransactionService.GetTransactionsAsync();
+        transactions = transactions.Where(t => t.TransactionDate >= searchCriteria.StartDate && t.TransactionDate <= searchCriteria.EndDate).ToList();
+
         totalCashInflows = transactions.Where(t => t.TransactionTransactionType == TransactionType.Credit).Sum(t => t.TransactionAmount);
         totalCashOutflows = transactions.Where(t => t.TransactionTransactionType == TransactionType.Debit).Sum(t => t.TransactionAmount);
 
@@ -132,7 +242,25 @@
         remainingDebts = totalDebts - clearedDebts;
         pendingDebts = debts.Where(d => d.IsPending).ToList();
 
-        topHighestTransactions = await TransactionService.GetTopTransactionsAsync(5, highest: true);
-        topLowestTransactions = await TransactionService.GetTopTransactionsAsync(5, highest: false);
+        topHighestTransactions = transactions.OrderByDescending(t => t.TransactionAmount).ThenBy(t => t.TransactionDate).Take(5).ToList();
+        topLowestTransactions = transactions.OrderBy(t => t.TransactionAmount).ThenBy(t => t.TransactionDate).Take(5).ToList();
+
+        highestInflow = transactions.Where(t => t.TransactionTransactionType == TransactionType.Credit).OrderByDescending(t => t.TransactionAmount).FirstOrDefault();
+        highestOutflow = transactions.Where(t => t.TransactionTransactionType == TransactionType.Debit).OrderByDescending(t => t.TransactionAmount).FirstOrDefault();
+        lowestInflow = transactions.Where(t => t.TransactionTransactionType == TransactionType.Credit).OrderBy(t => t.TransactionAmount).FirstOrDefault();
+        lowestOutflow = transactions.Where(t => t.TransactionTransactionType == TransactionType.Debit).OrderBy(t => t.TransactionAmount).FirstOrDefault();
+    }
+
+    private void ClearFilters()
+    {
+        SetDefaultDates();
+        LoadDashboardData();
+    }
+
+    private class SearchCriteria
+    {
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }
+

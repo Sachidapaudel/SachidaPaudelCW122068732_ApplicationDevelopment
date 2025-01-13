@@ -230,8 +230,12 @@ namespace SachidaPaudel.Utils
             if (File.Exists(_transactionFilePath))
             {
                 var lines = File.ReadAllLines(_transactionFilePath).ToList();
-                lines = lines.Where(line => int.Parse(line.Split(',')[0]) != transactionId).ToList();
-                File.WriteAllLines(_transactionFilePath, lines);
+                var header = lines[0]; // Store the header line
+                var dataLines = lines.Skip(1) // Skip the header line
+                                     .Where(line => int.Parse(line.Split(',')[0]) != transactionId)
+                                     .ToList();
+                dataLines.Insert(0, header); // Reinsert the header line at the beginning
+                File.WriteAllLines(_transactionFilePath, dataLines);
             }
         }
 
@@ -346,4 +350,3 @@ namespace SachidaPaudel.Utils
         }
     }
 }
-

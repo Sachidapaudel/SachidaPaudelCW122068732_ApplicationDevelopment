@@ -1,7 +1,9 @@
 ﻿@page "/transaction"
 @using SachidaPaudel.Models
 @using SachidaPaudel.Service.TransactionService
+@using SachidaPaudel.Service.DebtsService
 @inject ITransactionService TransactionService
+@inject IDebtsService DebtsService
 
 <h2 class="text-center my-4">Transaction Manager</h2>
 
@@ -9,7 +11,6 @@
 <div class="alert alert-info text-center mb-4">
     <strong>Total Balance:</strong> @userBalance.ToString("C")
 </div>
-
 
 <!-- Search Transactions Section -->
 <div class="card mb-4">
@@ -23,7 +24,7 @@
                     <InputText @bind-Value="searchCriteria.Title" class="form-control" placeholder="Title" />
                 </div>
                 <div class="col-md-2">
-                    <InputSelect @bind-Value="searchCriteria.TransactionType" class="form-control">
+                    <InputSelect @bind-Value="searchCriteria.TransactionType" class="form-control" @onchange="OnTransactionTypeChanged">
                         <option value="">All Types</option>
                         <option value="Credit">Credit</option>
                         <option value="Debit">Debit</option>
@@ -135,10 +136,14 @@
                         <div class="mb-3">
                             <label for="addAmount" class="form-label">Amount</label>
                             <InputNumber id="addAmount" @bind-Value="newTransaction.TransactionAmount" class="form-control" required />
+                            @if (newTransaction.TransactionAmount <= 0)
+                            {
+                                <div class="text-danger">Amount must be greater than 0.</div>
+                            }
                         </div>
                         <div class="mb-3">
                             <label for="addType" class="form-label">Type</label>
-                            <InputSelect id="addType" @bind-Value="newTransaction.TransactionTransactionType" class="form-control">
+                            <InputSelect id="addType" @bind-Value="newTransaction.TransactionTransactionType" class="form-control" @onchange="OnTransactionTypeChanged">
                                 <option value="Credit">Credit</option>
                                 <option value="Debit">Debit</option>
                                 <option value="Debt">Debt</option>
@@ -152,17 +157,10 @@
                             <label for="existingTags" class="form-label">Existing Tags</label>
                             <InputSelect id="existingTags" @bind-Value="selectedExistingTag" class="form-control">
                                 <option value="">Select a tag</option>
-                                <option value="Yearly">Yearly</option>
-                                <option value="Monthly">Monthly</option>
-                                <option value="Food">Food</option>
-                                <option value="Drinks">Drinks</option>
-                                <option value="Clothes">Clothes</option>
-                                <option value="Gadgets">Gadgets</option>
-                                <option value="Miscellaneous">Miscellaneous</option>
-                                <option value="Fuel">Fuel</option>
-                                <option value="Rent">Rent</option>
-                                <option value="EMI">EMI</option>
-                                <option value="Party">Party</option>
+                                @foreach (var tag in existingTags)
+                                {
+                                    <option value="@tag">@tag</option>
+                                }
                             </InputSelect>
                         </div>
                         <div class="mb-3">
@@ -173,8 +171,15 @@
                             <label for="addNote" class="form-label">Notes</label>
                             <InputText id="addNote" @bind-Value="newTransaction.Note" class="form-control" />
                         </div>
+                        @if (isDebtTransaction)
+                        {
+                            <div class="mb-3">
+                                <label for="debtDueDate" class="form-label">Debt Due Date</label>
+                                <InputDate id="debtDueDate" @bind-Value="newDebt.DebtDueDate" class="form-control" required />
+                            </div>
+                        }
                         <div class="text-end">
-                            <button type="submit" class="btn btn-primary">Add Transaction</button>
+                            <button type="submit" class="btn btn-primary" disabled="@(!IsValidTransaction(newTransaction))">Add Transaction</button>
                             <button type="button" class="btn btn-secondary" @onclick="CloseAddTransactionModal">Cancel</button>
                         </div>
                     </EditForm>
@@ -203,6 +208,10 @@
                         <div class="mb-3">
                             <label for="editAmount" class="form-label">Amount</label>
                             <InputNumber id="editAmount" @bind-Value="editTransaction.TransactionAmount" class="form-control" required />
+                            @if (editTransaction.TransactionAmount <= 0)
+                            {
+                                <div class="text-danger">Amount must be greater than 0.</div>
+                            }
                         </div>
                         <div class="mb-3">
                             <label for="editType" class="form-label">Type</label>
@@ -225,7 +234,7 @@
                             <InputText id="editNote" @bind-Value="editTransaction.Note" class="form-control" />
                         </div>
                         <div class="text-end">
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <button type="submit" class="btn btn-primary" disabled="@(!IsValidTransaction(editTransaction))">Save Changes</button>
                             <button type="button" class="btn btn-secondary" @onclick="CloseEditModal">Cancel</button>
                         </div>
                     </EditForm>
@@ -260,6 +269,7 @@
     private List<SachidaPaudel.Models.Transaction> transactions = new List<SachidaPaudel.Models.Transaction>();
     private SachidaPaudel.Models.Transaction newTransaction = new SachidaPaudel.Models.Transaction() { TransactionDate = DateTime.Now };
     private SachidaPaudel.Models.Transaction editTransaction = new SachidaPaudel.Models.Transaction();
+    private SachidaPaudel.Models.Debts newDebt = new SachidaPaudel.Models.Debts() { DebtDueDate = DateTime.Now };
     private List<SachidaPaudel.Models.Transaction> pendingDebts = new List<SachidaPaudel.Models.Transaction>();
     private List<string> existingTags = new List<string>
     {
@@ -274,6 +284,7 @@
     private bool isAddModalVisible = false;
     private bool isEditModalVisible = false;
     private bool isInsufficientBalanceModalVisible = false;
+    private bool isDebtTransaction = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -290,11 +301,17 @@
     private void CloseAddTransactionModal()
     {
         isAddModalVisible = false;
+        isDebtTransaction = false; // Reset the flag when closing the modal
     }
 
     private void CloseInsufficientBalanceModal()
     {
         isInsufficientBalanceModalVisible = false;
+    }
+
+    private bool IsValidTransaction(SachidaPaudel.Models.Transaction transaction)
+    {
+        return !string.IsNullOrEmpty(transaction.TransactionTitle) && transaction.TransactionAmount > 0;
     }
 
     private async Task AddTransaction()
@@ -323,6 +340,14 @@
             // Add the new transaction using the service
             await TransactionService.AddTransactionAsync(newTransaction);
 
+            // If the transaction is a debt, add it to the debts list
+            if (newTransaction.TransactionTransactionType == TransactionType.Debt)
+            {
+                newDebt.DebtSource = newTransaction.TransactionTitle;
+                newDebt.DebtAmount = newTransaction.TransactionAmount;
+                await DebtsService.AddDebtAsync(newDebt);
+            }
+
             // Refresh the transaction list and user balance
             transactions = await TransactionService.GetTransactionsAsync();
             userBalance = await TransactionService.GetUserBalanceAsync();
@@ -330,6 +355,7 @@
 
             // Reset form fields after adding the transaction
             newTransaction = new SachidaPaudel.Models.Transaction() { TransactionDate = DateTime.Now };
+            newDebt = new SachidaPaudel.Models.Debts() { DebtDueDate = DateTime.Now };
             selectedExistingTag = "";
             customTagInput = "";
             CloseAddTransactionModal();
@@ -410,6 +436,11 @@
         transactions = await TransactionService.GetTransactionsAsync();
     }
 
+    private void OnTransactionTypeChanged(ChangeEventArgs e)
+    {
+        isDebtTransaction = e.Value?.ToString() == "Debt";
+    }
+
     private class SearchCriteria
     {
         public string Title { get; set; } = string.Empty;
@@ -421,4 +452,5 @@
         public bool Ascending { get; set; } = true;
     }
 }
+
 
