@@ -242,6 +242,9 @@
         remainingDebts = totalDebts - clearedDebts;
         pendingDebts = debts.Where(d => !d.IsCleared).ToList(); // Ensure pending debts are correctly filtered
 
+        // Include cleared debts in the outflow calculation
+        totalCashOutflows += clearedDebts;
+
         topHighestTransactions = transactions.OrderByDescending(t => t.TransactionAmount).ThenBy(t => t.TransactionDate).Take(5).ToList();
         topLowestTransactions = transactions.OrderBy(t => t.TransactionAmount).ThenBy(t => t.TransactionDate).Take(5).ToList();
 
