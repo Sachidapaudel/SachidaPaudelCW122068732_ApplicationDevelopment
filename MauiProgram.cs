@@ -5,6 +5,7 @@ using SachidaPaudel.Service.DebtsService;
 using Microsoft.AspNetCore.Components.Web;
 using SachidaPaudel.Utils;
 using SachidaPaudel.Service;
+using MudBlazor.Services;
 
 namespace SachidaPaudel
 {
@@ -21,6 +22,10 @@ namespace SachidaPaudel
                 });
 
             builder.Services.AddMauiBlazorWebView();
+
+            builder.Services.AddMudServices();
+
+
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
@@ -53,3 +58,4 @@ namespace SachidaPaudel
         }
     }
 }
+

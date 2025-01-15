@@ -2,6 +2,7 @@
 @using SachidaPaudel.Service.TransactionService
 @using SachidaPaudel.Service.DebtsService
 @using SachidaPaudel.Models
+@using MudBlazor
 @inject ITransactionService TransactionService
 @inject IDebtsService DebtService
 
@@ -55,6 +56,10 @@
             </div>
         </div>
     </div>
+
+
+        </div>
+
 
     <!-- Highest/Lowest Inflow and Outflow -->
     <div class="row text-center mb-5">
@@ -124,6 +129,7 @@
 
     </div>
 
+
     <!-- Transactions Section -->
     <div class="row">
         <div class="col-md-6 mb-4">
@@ -167,8 +173,6 @@
             </div>
         </div>
     </div>
-</div>
-
 <style>
     .card {
         transition: transform 0.2s;
@@ -183,6 +187,35 @@
         padding: 8px 12px;
     }
 </style>
+
+
+<!-- Pie Charts for Inflow/Outflow and Cleared/Remaining Debt -->
+<div class="row text-center mb-5">
+    <MudPaper Class="pa-4">
+        <MudChart ChartType="ChartType.Pie" InputData="@data" InputLabels="@labels" Width="300px" Height="300px" />
+    </MudPaper>
+
+    <MudPaper Class="pa-4 mt-2 d-flex justify-center">
+        <MudButton OnClick="RandomizeData" Variant="Variant.Filled" Class="mx-4">Randomize</MudButton>
+    </MudPaper>
+
+
+    @code {
+        private double[] data = { 60, 40 };  // 60% inflow, 40% outflow
+        private string[] labels = { "Inflows", "Outflows" };
+
+        private Random random = new Random();
+
+        // Randomize inflow and outflow data for demonstration
+        void RandomizeData()
+        {
+            data[0] = random.NextDouble() * 100;  // Inflow
+            data[1] = 100 - data[0];  // Outflow (remaining percentage)
+            StateHasChanged();  // Trigger UI update
+        }
+    }
+</div>
+
 @code {
     private decimal totalCashInflows;
     private decimal totalCashOutflows;
@@ -197,6 +230,10 @@
     private SachidaPaudel.Models.Transaction? lowestInflow;
     private SachidaPaudel.Models.Transaction? lowestOutflow;
     private SearchCriteria searchCriteria = new SearchCriteria();
+    private List<decimal> inflowOutflowData = new List<decimal>();
+    private List<string> inflowOutflowLabels = new List<string> { "Inflow", "Outflow" };
+    private List<decimal> debtData = new List<decimal>();
+    private List<string> debtLabels = new List<string> { "Cleared Debt", "Remaining Debt" };
 
     protected override async Task OnInitializedAsync()
     {
@@ -234,6 +271,10 @@
         highestOutflow = transactions.Where(t => t.TransactionTransactionType == TransactionType.Debit).OrderByDescending(t => t.TransactionAmount).FirstOrDefault();
         lowestInflow = transactions.Where(t => t.TransactionTransactionType == TransactionType.Credit).OrderBy(t => t.TransactionAmount).FirstOrDefault();
         lowestOutflow = transactions.Where(t => t.TransactionTransactionType == TransactionType.Debit).OrderBy(t => t.TransactionAmount).FirstOrDefault();
+
+        // Update pie chart data
+        inflowOutflowData = new List<decimal> { totalCashInflows, totalCashOutflows };
+        debtData = new List<decimal> { clearedDebts, remainingDebts };
     }
 
     private void ClearFilters()
@@ -247,4 +288,6 @@
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
     }
+
 }
+

@@ -1,6 +1,15 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager Navigation
 @inject SachidaPaudel.Service.UserService.IUserService UserService
+@* Required *@
+<MudThemeProvider />
+<MudPopoverProvider />
+
+@* Needed for dialogs *@
+<MudDialogProvider />
+
+@* Needed for snackbars *@
+<MudSnackbarProvider />
 
 @if (!_isInitialized)
 {
