@@ -1,39 +1,62 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">TrackIT</a>
+﻿<div class="sidebar-container">
+    <div class="top-row ps-3 navbar navbar-dark" style="background-color: #198754;">
+        <div class="container-fluid">
+            <a class="navbar-brand text-white fw-bold" href="">TrackIT</a>
+        </div>
+    </div>
+
+    <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+    <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+        <nav class="flex-column" style="background-color: #198754; min-height: 100vh;">
+            <div class="nav-item px-3">
+                <NavLink class="nav-link text-white fw-bold" href="/" Match="NavLinkMatch.All">
+                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Dashboard
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link text-white fw-bold" href="/transaction">
+                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Transaction
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link text-white fw-bold" href="/debts">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Debts
+                </NavLink>
+            </div>
+            <div class="nav-item px-3 mt-3">
+                <button class="btn btn-danger fw-bold w-100" @onclick="Logout">
+                    <span class="bi bi-box-arrow-right" aria-hidden="true"></span> Logout
+                </button>
+            </div>
+        </nav>
     </div>
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<style>
+    .sidebar-container {
+        height: 100%;
+        min-height: 100vh;
+        background-color: #198754;
+    }
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Dashboard
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/transaction">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Transaction
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/debts">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Debts
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <button class="btn btn-danger" @onclick="Logout">
-                <span class="bi bi-box-arrow-right" aria-hidden="true"></span> Logout
-            </button>
-        </div>
-    </nav>
-</div>
+    .nav-link:hover {
+        background-color: #157347;
+    }
+
+    .nav-link.active {
+        background-color: #157347;
+    }
+
+    .nav-scrollable {
+        height: calc(100vh - 3.5rem);
+        overflow-y: auto;
+    }
+</style>
+
 @code {
     private void Logout()
     {
-        // Redirect to login page
         NavigationManager.NavigateTo("/login");
     }
 

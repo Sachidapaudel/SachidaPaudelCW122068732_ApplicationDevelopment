@@ -6,38 +6,67 @@
 @using SachidaPaudel.Utils
 
 <div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white text-center">
-                    <h3>Register</h3>
+    <!-- Register Header -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-success">Create Your Account</h2>
+        <p class="text-muted">Join us today by creating a new account.</p>
+    </div>
+
+    <!-- Register Form -->
+    <div class="card shadow border-0 mx-auto" style="max-width: 400px; border-radius: 15px;">
+        <div class="card-body">
+            <form>
+                <!-- Username -->
+                <div class="mb-3">
+                    <label for="username" class="form-label fw-semibold text-success">Username</label>
+                    <input type="text" class="form-control shadow-sm border-success" id="username" placeholder="Choose a username" @bind="username" />
                 </div>
-                <div class="card-body">
-                    <div class="form-group mb-3">
-                        <label for="username">Username</label>
-                        <input type="text" class="form-control" id="username" @bind="username" placeholder="Enter your username" />
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="password">Password</label>
-                        <input type="password" class="form-control" id="password" @bind="password" placeholder="Enter your password" />
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="currency">Preferred Currency</label>
-                        <input type="text" class="form-control" id="currency" @bind="currency" placeholder="Enter your preferred currency" />
-                    </div>
-                    <button class="btn btn-primary w-100" @onclick="RegisterAccount">Register</button>
-                    @if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        <div class="alert alert-danger mt-3">@errorMessage</div>
-                    }
-                    <div class="mt-3 text-center">
-                        <span>Already have an account? <a href="/login">Login</a></span>
-                    </div>
+
+                <!-- Password -->
+                <div class="mb-3">
+                    <label for="password" class="form-label fw-semibold text-success">Password</label>
+                    <input type="password" class="form-control shadow-sm border-success" id="password" placeholder="Create a password" @bind="password" />
                 </div>
+
+                <!-- Preferred Currency -->
+                <div class="mb-4">
+                    <label for="currency" class="form-label fw-semibold text-success">Preferred Currency</label>
+                    <input type="text" class="form-control shadow-sm border-success" id="currency" placeholder="E.g., USD, EUR" @bind="currency" />
+                </div>
+
+                <!-- Register Button -->
+                <button type="button" class="btn btn-success w-100 shadow-sm fw-bold" style="border-radius: 8px;" @onclick="RegisterAccount">Register</button>
+            </form>
+
+            <!-- Error Message -->
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger mt-3 text-center">@errorMessage</div>
+            }
+
+            <!-- Login Link -->
+            <div class="mt-4 text-center">
+                <span class="text-muted">Already have an account? <a href="/login" class="text-success fw-bold">Login</a></span>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    body {
+        background-color: #e9f7ef;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 8px rgba(72, 201, 176, 0.5);
+        border-color: #48c9b0;
+    }
+
+    .btn-success:hover {
+        background-color: #3cb371;
+        border-color: #3cb371;
+    }
+</style>
 
 @code {
     private string username = string.Empty;
@@ -83,4 +112,3 @@
         }
     }
 }
-

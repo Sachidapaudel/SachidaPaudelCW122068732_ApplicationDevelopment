@@ -7,50 +7,50 @@
 
 <div class="container mt-5">
     <!-- Dashboard Header -->
-    <div class="text-center mb-5">
-        <h1 class="fw-bold">💰 TRACK IT Dashboard</h1>
+    <div class="text-center mb-4">
+        <h2 class="fw-bold" style="color: #198754;">💰 TRACK IT Dashboard</h2>
         <p class="text-muted">Your financial summary at a glance.</p>
     </div>
 
     <!-- Date Range Filter -->
     <div class="row mb-4">
         <div class="col-md-5">
-            <label for="startDate" class="form-label">Start Date</label>
-            <InputDate id="startDate" @bind-Value="searchCriteria.StartDate" class="form-control" />
+            <label for="startDate" class="form-label" style="color: #198754;">Start Date</label>
+            <InputDate id="startDate" @bind-Value="searchCriteria.StartDate" class="form-control border-success" />
         </div>
         <div class="col-md-5">
-            <label for="endDate" class="form-label">End Date</label>
-            <InputDate id="endDate" @bind-Value="searchCriteria.EndDate" class="form-control" />
+            <label for="endDate" class="form-label" style="color: #198754;">End Date</label>
+            <InputDate id="endDate" @bind-Value="searchCriteria.EndDate" class="form-control border-success" />
         </div>
         <div class="col-md-2 d-flex align-items-end">
-            <button class="btn btn-primary me-2" @onclick="LoadDashboardData">Filter</button>
-            <button class="btn btn-secondary" @onclick="ClearFilters">Clear</button>
+            <button class="btn btn-success me-2 w-100" style="background-color: #198754;" @onclick="LoadDashboardData">Filter</button>
+            <button class="btn btn-outline-success w-100" style="border-color: #198754; color: #198754;" @onclick="ClearFilters">Clear</button>
         </div>
     </div>
 
     <!-- Summary Cards -->
     <div class="row text-center mb-5">
         <div class="col-md-4 mb-4">
-            <div class="card shadow border-0">
+            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754;">
                 <div class="card-body">
-                    <h5 class="card-title text-primary">Total Cash Inflows</h5>
-                    <h3 class="fw-bold">@totalCashInflows.ToString("C")</h3>
+                    <h5 class="card-title" style="color: #198754;">Total Cash Inflows</h5>
+                    <h3 class="fw-bold" style="color: #198754;">@totalCashInflows.ToString("C")</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-4">
-            <div class="card shadow border-0">
+            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754;">
                 <div class="card-body">
-                    <h5 class="card-title text-danger">Total Cash Outflows</h5>
-                    <h3 class="fw-bold">@totalCashOutflows.ToString("C")</h3>
+                    <h5 class="card-title" style="color: #198754;">Total Cash Outflows</h5>
+                    <h3 class="fw-bold text-danger">@totalCashOutflows.ToString("C")</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-4">
-            <div class="card shadow border-0">
+            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754;">
                 <div class="card-body">
-                    <h5 class="card-title text-warning">Remaining Debts</h5>
-                    <h3 class="fw-bold">@remainingDebts.ToString("C")</h3>
+                    <h5 class="card-title" style="color: #198754;">Remaining Debts</h5>
+                    <h3 class="fw-bold text-warning">@remainingDebts.ToString("C")</h3>
                 </div>
             </div>
         </div>
@@ -59,69 +59,35 @@
     <!-- Highest/Lowest Inflow and Outflow -->
     <div class="row text-center mb-5">
         <div class="col-md-6 mb-4">
-            <div class="card shadow border-0">
+            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754;">
                 <div class="card-body">
-                    <h5 class="card-title text-success">Highest Inflow</h5>
+                    <h5 class="card-title" style="color: #198754;">Highest Inflow</h5>
                     @if (highestInflow != null)
                     {
-                        <h3 class="fw-bold">@highestInflow.TransactionAmount.ToString("C")</h3>
+                        <h3 class="fw-bold" style="color: #198754;">@highestInflow.TransactionAmount.ToString("C")</h3>
                         <p class="text-muted">@highestInflow.TransactionTitle</p>
                         <p class="text-muted">@highestInflow.TransactionDate.ToString("d")</p>
                     }
                     else
                     {
-                        <h3 class="fw-bold">N/A</h3>
+                        <h3 class="fw-bold text-muted">N/A</h3>
                     }
                 </div>
             </div>
         </div>
         <div class="col-md-6 mb-4">
-            <div class="card shadow border-0">
+            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754;">
                 <div class="card-body">
-                    <h5 class="card-title text-danger">Highest Outflow</h5>
+                    <h5 class="card-title" style="color: #198754;">Highest Outflow</h5>
                     @if (highestOutflow != null)
                     {
-                        <h3 class="fw-bold">@highestOutflow.TransactionAmount.ToString("C")</h3>
+                        <h3 class="fw-bold text-danger">@highestOutflow.TransactionAmount.ToString("C")</h3>
                         <p class="text-muted">@highestOutflow.TransactionTitle</p>
                         <p class="text-muted">@highestOutflow.TransactionDate.ToString("d")</p>
                     }
                     else
                     {
-                        <h3 class="fw-bold">N/A</h3>
-                    }
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 mb-4">
-            <div class="card shadow border-0">
-                <div class="card-body">
-                    <h5 class="card-title text-success">Lowest Inflow</h5>
-                    @if (lowestInflow != null)
-                    {
-                        <h3 class="fw-bold">@lowestInflow.TransactionAmount.ToString("C")</h3>
-                        <p class="text-muted">@lowestInflow.TransactionTitle</p>
-                        <p class="text-muted">@lowestInflow.TransactionDate.ToString("d")</p>
-                    }
-                    else
-                    {
-                        <h3 class="fw-bold">N/A</h3>
-                    }
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 mb-4">
-            <div class="card shadow border-0">
-                <div class="card-body">
-                    <h5 class="card-title text-danger">Lowest Outflow</h5>
-                    @if (lowestOutflow != null)
-                    {
-                        <h3 class="fw-bold">@lowestOutflow.TransactionAmount.ToString("C")</h3>
-                        <p class="text-muted">@lowestOutflow.TransactionTitle</p>
-                        <p class="text-muted">@lowestOutflow.TransactionDate.ToString("d")</p>
-                    }
-                    else
-                    {
-                        <h3 class="fw-bold">N/A</h3>
+                        <h3 class="fw-bold text-muted">N/A</h3>
                     }
                 </div>
             </div>
@@ -131,37 +97,39 @@
     <!-- Debts Section -->
     <div class="row mb-5">
         <div class="col-md-6">
-            <div class="card shadow border-0">
+            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754;">
                 <div class="card-body">
-                    <h5 class="card-title">Cleared Debts</h5>
-                    <h4 class="fw-bold text-success">@clearedDebts.ToString("C")</h4>
+                    <h5 class="card-title" style="color: #198754;">Cleared Debts</h5>
+                    <h4 class="fw-bold" style="color: #198754;">@clearedDebts.ToString("C")</h4>
                 </div>
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card shadow border-0">
+            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754; background-color: #eaf5e0;">
                 <div class="card-body">
-                    <h5 class="card-title">Pending Debts</h5>
+                    <h5 class="card-title" style="color: #198754;">Pending Debts</h5>
                     <ul class="list-group list-group-flush">
                         @foreach (var debt in pendingDebts)
                         {
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <li class="list-group-item d-flex justify-content-between align-items-center"
+                                style="background-color: #f0f8f1; border-left: 4px solid #198754;">
                                 @debt.DebtSource
-                                <span class="badge bg-danger">@debt.DebtAmount.ToString("C")</span>
+                                <span class="badge" style="background-color: #198754;">@debt.DebtAmount.ToString("C")</span>
                             </li>
                         }
                     </ul>
                 </div>
             </div>
         </div>
+
     </div>
 
     <!-- Transactions Section -->
     <div class="row">
         <div class="col-md-6 mb-4">
-            <div class="card shadow border-0">
+            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754;">
                 <div class="card-body">
-                    <h5 class="card-title">Top 5 Highest Transactions</h5>
+                    <h5 class="card-title" style="color: #198754;">Top 5 Highest Transactions</h5>
                     <ul class="list-group list-group-flush">
                         @foreach (var transaction in topHighestTransactions)
                         {
@@ -171,7 +139,7 @@
                                     <br />
                                     <small class="text-muted">@transaction.TransactionDate.ToString("d")</small>
                                 </div>
-                                <span class="badge bg-success">@transaction.TransactionAmount.ToString("C")</span>
+                                <span class="badge" style="background-color: #198754;">@transaction.TransactionAmount.ToString("C")</span>
                             </li>
                         }
                     </ul>
@@ -179,9 +147,9 @@
             </div>
         </div>
         <div class="col-md-6 mb-4">
-            <div class="card shadow border-0">
+            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754;">
                 <div class="card-body">
-                    <h5 class="card-title">Top 5 Lowest Transactions</h5>
+                    <h5 class="card-title" style="color: #198754;">Top 5 Lowest Transactions</h5>
                     <ul class="list-group list-group-flush">
                         @foreach (var transaction in topLowestTransactions)
                         {
@@ -191,7 +159,7 @@
                                     <br />
                                     <small class="text-muted">@transaction.TransactionDate.ToString("d")</small>
                                 </div>
-                                <span class="badge bg-secondary">@transaction.TransactionAmount.ToString("C")</span>
+                                <span class="badge" style="background-color: #198754;">@transaction.TransactionAmount.ToString("C")</span>
                             </li>
                         }
                     </ul>
@@ -201,6 +169,20 @@
     </div>
 </div>
 
+<style>
+    .card {
+        transition: transform 0.2s;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+    .badge {
+        font-size: 0.9em;
+        padding: 8px 12px;
+    }
+</style>
 @code {
     private decimal totalCashInflows;
     private decimal totalCashOutflows;

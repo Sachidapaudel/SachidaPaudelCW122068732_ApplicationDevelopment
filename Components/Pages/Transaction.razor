@@ -5,12 +5,20 @@
 @inject ITransactionService TransactionService
 @inject IDebtsService DebtsService
 
-<h2 class="text-center my-4">Transaction Manager</h2>
+<h2 class="text-center my-4 text-success">Transaction Manager</h2>
 
 <!-- User Balance Section -->
-<div class="alert alert-info text-center mb-4">
+<div class="alert alert-success text-center mb-4">
     <strong>Total Balance:</strong> @userBalance.ToString("C")
 </div>
+
+<!-- Success Message -->
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success text-center mb-4">
+        @successMessage
+    </div>
+}
 
 <!-- Search Transactions Section -->
 <div class="card mb-4">
@@ -56,7 +64,7 @@
                     </InputSelect>
                 </div>
                 <div class="col-md-4 d-flex align-items-center">
-                    <button type="submit" class="btn btn-primary me-2">Search</button>
+                    <button type="submit" class="btn btn-success me-2">Search</button>
                     <button type="button" class="btn btn-secondary" @onclick="ClearSearchFilters">Clear</button>
                 </div>
             </div>
@@ -73,20 +81,20 @@
 @if (showTransactionTypeButtons)
 {
     <div class="text-center mb-4">
-        <button class="btn btn-primary me-2" @onclick="() => OpenAddTransactionModal(TransactionType.Credit)">Credit</button>
-        <button class="btn btn-primary me-2" @onclick="() => OpenAddTransactionModal(TransactionType.Debit)">Debit</button>
-        <button class="btn btn-primary" @onclick="() => OpenAddTransactionModal(TransactionType.Debt)">Debt</button>
+        <button class="btn btn-success me-2" @onclick="() => OpenAddTransactionModal(TransactionType.Credit)">Credit</button>
+        <button class="btn btn-success me-2" @onclick="() => OpenAddTransactionModal(TransactionType.Debit)">Debit</button>
+        <button class="btn btn-success" @onclick="() => OpenAddTransactionModal(TransactionType.Debt)">Debt</button>
     </div>
 }
 
 <!-- Transaction List Section -->
 <div class="card">
-    <div class="card-header bg-secondary text-white">
+    <div class="card-header bg-success text-white">
         <h5 class="mb-0">Transaction List</h5>
     </div>
     <div class="card-body">
         <table class="table table-hover">
-            <thead class="thead-dark">
+            <thead class="thead-light">
                 <tr>
                     <th>Title</th>
                     <th>Amount</th>
@@ -110,7 +118,7 @@
                             <td>@string.Join(", ", transaction.Tags)</td>
                             <td>@transaction.Note</td>
                             <td>
-                                <button class="btn btn-primary btn-sm" @onclick="() => EditTransaction(transaction)">Edit</button>
+                                <button class="btn btn-warning btn-sm" @onclick="() => EditTransaction(transaction)">Edit</button>
                                 <button class="btn btn-danger btn-sm" @onclick="() => DeleteTransaction(transaction.TransactionId)">Delete</button>
                             </td>
                         </tr>
@@ -133,7 +141,7 @@
     <div class="modal show d-block" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-success text-white">
                     <h5 class="modal-title">Add Transaction</h5>
                     <button type="button" class="btn-close" @onclick="CloseAddTransactionModal"></button>
                 </div>
@@ -144,17 +152,25 @@
                             <div class="mb-3">
                                 <label for="source" class="form-label">Source</label>
                                 <InputText id="source" class="form-control" @bind-Value="newDebt.DebtSource" required />
+                                @if (string.IsNullOrEmpty(newDebt.DebtSource))
+                                {
+                                    <div class="text-danger">Source is required.</div>
+                                }
                             </div>
                             <div class="mb-3">
                                 <label for="amount" class="form-label">Amount</label>
                                 <InputNumber id="amount" class="form-control" @bind-Value="newDebt.DebtAmount" required />
+                                @if (newDebt.DebtAmount <= 0)
+                                {
+                                    <div class="text-danger">Amount must be greater than 0.</div>
+                                }
                             </div>
                             <div class="mb-3">
                                 <label for="dueDate" class="form-label">Due Date</label>
                                 <InputDate id="dueDate" class="form-control" @bind-Value="newDebt.DebtDueDate" required />
                             </div>
                             <div class="text-end">
-                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <button type="submit" class="btn btn-success">Submit</button>
                                 <button type="button" class="btn btn-secondary" @onclick="CloseAddTransactionModal">Cancel</button>
                             </div>
                         </EditForm>
@@ -165,6 +181,10 @@
                             <div class="mb-3">
                                 <label for="addTitle" class="form-label">Title</label>
                                 <InputText id="addTitle" @bind-Value="newTransaction.TransactionTitle" class="form-control" required />
+                                @if (string.IsNullOrEmpty(newTransaction.TransactionTitle))
+                                {
+                                    <div class="text-danger">Title is required.</div>
+                                }
                             </div>
                             <div class="mb-3">
                                 <label for="addAmount" class="form-label">Amount</label>
@@ -198,13 +218,17 @@
                             <div class="mb-3">
                                 <label for="addTags" class="form-label">Custom Tags</label>
                                 <InputText id="addTags" @bind-Value="customTagInput" class="form-control" placeholder="Tags (comma separated)" />
+                                @if (string.IsNullOrEmpty(customTagInput) && string.IsNullOrEmpty(selectedExistingTag))
+                                {
+                                    <div class="text-danger">At least one tag is required.</div>
+                                }
                             </div>
                             <div class="mb-3">
                                 <label for="addNote" class="form-label">Notes</label>
                                 <InputText id="addNote" @bind-Value="newTransaction.Note" class="form-control" />
                             </div>
                             <div class="text-end">
-                                <button type="submit" class="btn btn-primary" disabled="@(!IsValidTransaction(newTransaction))">Add Transaction</button>
+                                <button type="submit" class="btn btn-success" disabled="@(!IsValidTransaction(newTransaction))">Add Transaction</button>
                                 <button type="button" class="btn btn-secondary" @onclick="CloseAddTransactionModal">Cancel</button>
                             </div>
                         </EditForm>
@@ -221,7 +245,7 @@
     <div class="modal show d-block" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-success text-white">
                     <h5 class="modal-title">Edit Transaction</h5>
                     <button type="button" class="btn-close" @onclick="CloseEditModal"></button>
                 </div>
@@ -260,7 +284,7 @@
                             <InputText id="editNote" @bind-Value="editTransaction.Note" class="form-control" />
                         </div>
                         <div class="text-end">
-                            <button type="submit" class="btn btn-primary" disabled="@(!IsValidTransaction(editTransaction))">Save Changes</button>
+                            <button type="submit" class="btn btn-success" disabled="@(!IsValidTransaction(editTransaction))">Save Changes</button>
                             <button type="button" class="btn btn-secondary" @onclick="CloseEditModal">Cancel</button>
                         </div>
                     </EditForm>
@@ -276,7 +300,7 @@
     <div class="modal show d-block" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title">Insufficient Balance</h5>
                     <button type="button" class="btn-close" @onclick="CloseInsufficientBalanceModal"></button>
                 </div>
@@ -290,6 +314,7 @@
         </div>
     </div>
 }
+
 
 @code {
     private List<SachidaPaudel.Models.Transaction> transactions = new List<SachidaPaudel.Models.Transaction>();
@@ -312,6 +337,7 @@
     private bool isInsufficientBalanceModalVisible = false;
     private bool isDebtTransaction = false;
     private bool showTransactionTypeButtons = false;
+    private string? successMessage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -354,6 +380,7 @@
     {
         return !string.IsNullOrEmpty(transaction.TransactionTitle) && transaction.TransactionAmount > 0;
     }
+
 
     private async Task AddTransaction()
     {
@@ -401,6 +428,10 @@
             selectedExistingTag = "";
             customTagInput = "";
             CloseAddTransactionModal();
+
+            // Set success message
+            // successMessage = "Transaction successfully added!";
+            // await ClearSuccessMessageAfterDelay();
         }
         catch (InvalidOperationException ex)
         {
@@ -424,6 +455,10 @@
             // Reset form fields after adding the debt
             newDebt = new SachidaPaudel.Models.Debts() { DebtDueDate = DateTime.Now };
             CloseAddTransactionModal();
+
+            // Set success message
+            // successMessage = "Debt successfully added!";
+            // await ClearSuccessMessageAfterDelay();
         }
         catch (InvalidOperationException ex)
         {
@@ -449,6 +484,10 @@
 
             // Close the edit modal
             CloseEditModal();
+
+            // Set success message
+            // successMessage = "Transaction successfully updated!";
+            // await ClearSuccessMessageAfterDelay();
         }
         catch (InvalidOperationException ex)
         {
