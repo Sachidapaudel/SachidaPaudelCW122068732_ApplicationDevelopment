@@ -1,9 +1,7 @@
-﻿using System;
+﻿using SachidaPaudel.Models;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using SachidaPaudel.Models;
 
 namespace SachidaPaudel.Service.TransactionService
 {
@@ -15,10 +13,10 @@ namespace SachidaPaudel.Service.TransactionService
         Task<List<Transaction>> GetTopTransactionsAsync(int count, bool highest = true);
         Task<decimal> GetUserBalanceAsync();
         Task<List<Transaction>> GetPendingDebtsAsync();
-        Task UpdateTransactionAsync(Transaction transaction); // Add this method
-        Task DeleteTransactionAsync(int transactionId); // Add this method
-        Task<List<string>> GetExistingTagsAsync(); // Add this method
+        Task UpdateTransactionAsync(Transaction transaction);
+        Task DeleteTransactionAsync(int transactionId);
+        Task<List<string>> GetExistingTagsAsync();
+        Task DeleteTransactionByDebtAsync(string debtSource, decimal debtAmount); // Add this method
     }
+
 }
-
-

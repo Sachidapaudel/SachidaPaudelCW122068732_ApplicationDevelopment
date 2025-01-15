@@ -179,18 +179,25 @@ namespace SachidaPaudel.Utils
                             var parts = line.Split(',');
                             if (parts.Length >= 7)
                             {
-                                var transaction = new Transaction
+                                try
                                 {
-                                    TransactionId = int.Parse(parts[0]),
-                                    TransactionTitle = parts[1],
-                                    TransactionAmount = decimal.Parse(parts[2]),
-                                    TransactionDate = DateTime.Parse(parts[3], null, DateTimeStyles.RoundtripKind),
-                                    TransactionTransactionType = Enum.Parse<TransactionType>(parts[4]),
-                                    Note = parts[5],
-                                    Tags = parts[6].Split(';').ToList()
-                                };
+                                    var transaction = new Transaction
+                                    {
+                                        TransactionId = int.Parse(parts[0]),
+                                        TransactionTitle = parts[1],
+                                        TransactionAmount = decimal.Parse(parts[2]),
+                                        TransactionDate = DateTime.Parse(parts[3], null, DateTimeStyles.RoundtripKind),
+                                        TransactionTransactionType = Enum.Parse<TransactionType>(parts[4]),
+                                        Note = parts[5],
+                                        Tags = parts[6].Split(';').ToList()
+                                    };
 
-                                transactions.Add(transaction);
+                                    transactions.Add(transaction);
+                                }
+                                catch (FormatException ex)
+                                {
+                                    Console.WriteLine($"Error parsing line: {line}. Exception: {ex.Message}");
+                                }
                             }
                         }
                     }
@@ -325,16 +332,23 @@ namespace SachidaPaudel.Utils
                             var parts = line.Split(',');
                             if (parts.Length >= 5)
                             {
-                                var debt = new Debts
+                                try
                                 {
-                                    DebtId = int.Parse(parts[0]),
-                                    DebtSource = parts[1],
-                                    DebtAmount = decimal.Parse(parts[2]),
-                                    DebtDueDate = DateTime.Parse(parts[3], null, DateTimeStyles.RoundtripKind),
-                                    IsCleared = bool.Parse(parts[4])
-                                };
+                                    var debt = new Debts
+                                    {
+                                        DebtId = int.Parse(parts[0]),
+                                        DebtSource = parts[1],
+                                        DebtAmount = decimal.Parse(parts[2]),
+                                        DebtDueDate = DateTime.Parse(parts[3], null, DateTimeStyles.RoundtripKind),
+                                        IsCleared = bool.Parse(parts[4])
+                                    };
 
-                                debts.Add(debt);
+                                    debts.Add(debt);
+                                }
+                                catch (FormatException ex)
+                                {
+                                    Console.WriteLine($"Error parsing line: {line}. Exception: {ex.Message}");
+                                }
                             }
                         }
                     }
@@ -348,5 +362,96 @@ namespace SachidaPaudel.Utils
 
             return debts;
         }
+
+        // Update debt data
+        public void UpdateDebt(Debts debt)
+        {
+            if (File.Exists(_debtFilePath))
+            {
+                var lines = File.ReadAllLines(_debtFilePath).ToList();
+                for (int i = 1; i < lines.Count; i++) // Start from 1 to skip the header
+                {
+                    var parts = lines[i].Split(',');
+                    if (int.Parse(parts[0]) == debt.DebtId)
+                    {
+                        lines[i] = $"{debt.DebtId},{debt.DebtSource},{debt.DebtAmount},{debt.DebtDueDate.ToString("o", CultureInfo.InvariantCulture)},{debt.IsCleared}";
+                        break;
+                    }
+                }
+                File.WriteAllLines(_debtFilePath, lines);
+            }
+        }
+    
+        // Get the next available debt ID
+        private int GetNextDebtId(List<Debts> debts)
+        {
+            if (debts.Count == 0)
+            {
+                return 1;
+            }
+
+            var existingIds = debts.Select(d => d.DebtId).ToList();
+            existingIds.Sort();
+
+            for (int i = 1; i <= existingIds.Count; i++)
+            {
+                if (i != existingIds[i - 1])
+                {
+                    return i;
+                }
+            }
+
+            return existingIds.Count + 1;
+        }
+
+        // Get debts asynchronously
+        public async Task<List<Debts>> GetDebtsAsync()
+        {
+            return await Task.Run(() => LoadDebts());
+        }
+
+
+        public async Task SaveDebtAsync(Debts debt)
+        {
+            var debts = LoadDebts();
+            debt.DebtId = GetNextDebtId(debts);
+            debts.Add(debt);
+            SaveDebts(debts);
+        }
+
+        public async Task UpdateDebtAsync(Debts debt)
+        {
+            var debts = LoadDebts();
+            var existingDebt = debts.FirstOrDefault(d => d.DebtId == debt.DebtId);
+            if (existingDebt != null)
+            {
+                debts.Remove(existingDebt);
+                debts.Add(debt);
+                SaveDebts(debts);
+            }
+        }
+
+        public async Task UpdateUserBalanceAsync()
+        {
+            var users = LoadUsers();
+            foreach (var user in users)
+            {
+                var transactions = LoadTransactions();
+                var debts = LoadDebts().Where(d => !d.IsCleared).ToList();
+
+                decimal balance = transactions.Sum(t => t.TransactionTransactionType == TransactionType.Credit ? t.TransactionAmount : -t.TransactionAmount);
+                balance -= debts.Sum(d => d.DebtAmount);
+
+                // Assuming there's a method to save the balance in the CsvHelper class
+                // Save the updated balance to the storage (if needed)
+                // _csvHelper.SaveBalance(user.Username, balance);
+            }
+        }
+
+        // Other methods (SaveUser, LoadUsers, SaveTransaction, LoadTransactions, etc.) remain unchanged
     }
+
+
+
 }
+

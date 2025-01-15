@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace SachidaPaudel.Models
 {
@@ -11,19 +10,19 @@ namespace SachidaPaudel.Models
         public DateTime DebtDueDate { get; set; } // The due date for repayment
         public bool IsCleared { get; set; } // Whether the debt is cleared (true) or pending (false)
 
-        public bool IsPending => !IsCleared && DebtDueDate <= DateTime.Now;
+        public bool IsPending => !IsCleared && DebtDueDate > DateTime.Now;
 
-        //// Parameterless constructor (required for compatibility)
-        //public Debts() { }
+        // Parameterless constructor (required for compatibility)
+        public Debts() { }
 
         // Parameterized constructor for easier initialization
-        //public Debts( string source, decimal amount, DateTime dueDate, bool isCleared)
-        //{
-        //    DebtSource = source;
-        //    DebtAmount = amount;
-        //    DebtDueDate = dueDate;
-        //    IsCleared = isCleared;
-        //}
+        public Debts(string source, decimal amount, DateTime dueDate, bool isCleared)
+        {
+            DebtSource = source;
+            DebtAmount = amount;
+            DebtDueDate = dueDate;
+            IsCleared = isCleared;
+        }
 
         // Method to clear debt from cash inflows
         public void ClearDebt(decimal cashInflows)
@@ -39,3 +38,4 @@ namespace SachidaPaudel.Models
         }
     }
 }
+

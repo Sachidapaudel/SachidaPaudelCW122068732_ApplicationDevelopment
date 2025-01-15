@@ -4,6 +4,7 @@ using SachidaPaudel.Service.UserService;
 using SachidaPaudel.Service.DebtsService;
 using Microsoft.AspNetCore.Components.Web;
 using SachidaPaudel.Utils;
+using SachidaPaudel.Service;
 
 namespace SachidaPaudel
 {
@@ -29,6 +30,7 @@ namespace SachidaPaudel
             builder.Services.AddSingleton<IUserService, UserService>();
             builder.Services.AddSingleton<ITransactionService, TransactionService>();
             builder.Services.AddSingleton<IDebtsService, DebtsService>();
+            builder.Services.AddSingleton<BalanceService>(); // Register BalanceService
 
             // Define and register the CSV file paths using environment special folders
             string userFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "user_credentials.csv");
@@ -51,4 +53,3 @@ namespace SachidaPaudel
         }
     }
 }
-

@@ -240,7 +240,7 @@
         totalDebts = debts.Sum(d => d.DebtAmount);
         clearedDebts = debts.Where(d => d.IsCleared).Sum(d => d.DebtAmount);
         remainingDebts = totalDebts - clearedDebts;
-        pendingDebts = debts.Where(d => d.IsPending).ToList();
+        pendingDebts = debts.Where(d => !d.IsCleared).ToList(); // Ensure pending debts are correctly filtered
 
         topHighestTransactions = transactions.OrderByDescending(t => t.TransactionAmount).ThenBy(t => t.TransactionDate).Take(5).ToList();
         topLowestTransactions = transactions.OrderBy(t => t.TransactionAmount).ThenBy(t => t.TransactionDate).Take(5).ToList();
@@ -263,4 +263,3 @@
         public DateTime? EndDate { get; set; }
     }
 }
-
