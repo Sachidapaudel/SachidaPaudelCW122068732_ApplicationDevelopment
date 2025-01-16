@@ -1,1 +1,2 @@
 # SachidaPaudelCW122068732_ApplicationDevelopment
+The "TrackIT" project is a prototype desktop application created for efficient personal expense tracking. Secured via a project auction on the Pranlancer platform, it was awarded based on strong reputation, positive reviews, and a competitive bid. The application aims to deliver a reliable and user-friendly solution for managing finances. Development will leverage a suitable .NET Core framework, ensuring compliance with the outlined requirements and completion within the specified timeline.
