@@ -6,6 +6,22 @@
 @inject ITransactionService TransactionService
 @inject IJSRuntime JSRuntime
 
+<style>
+    .pending-debt {
+        background-color: #fff3cd; /* Light yellow background for pending debts */
+    }
+
+    .btn-outline-warning {
+        color: #856404; /* Darker yellow color for better contrast */
+        border-color: #856404;
+    }
+
+        .btn-outline-warning:hover {
+            background-color: #856404;
+            color: white;
+        }
+</style>
+
 <div class="container py-4">
     <!-- Page Title -->
     <h3 class="text-center mb-4 text-success">Debts Management</h3>
@@ -24,7 +40,6 @@
             <table class="table table-striped table-responsive-md">
                 <thead class="table-success">
                     <tr>
-                        <th>ID</th>
                         <th>Source</th>
                         <th>Amount</th>
                         <th>Due Date</th>
@@ -37,8 +52,7 @@
                     {
                         foreach (var debt in debts)
                         {
-                            <tr>
-                                <td>@debt.DebtId</td>
+                            <tr class="@(debt.IsCleared ? "" : "pending-debt")">
                                 <td>@debt.DebtSource</td>
                                 <td>@debt.DebtAmount.ToString("C")</td>
                                 <td>@debt.DebtDueDate.ToString("MM/dd/yyyy")</td>
@@ -61,7 +75,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="6" class="text-center text-muted">No debts available.</td>
+                            <td colspan="5" class="text-center text-muted">No debts available.</td>
                         </tr>
                     }
                 </tbody>
@@ -187,4 +201,3 @@
         }
     }
 }
-
