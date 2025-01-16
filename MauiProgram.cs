@@ -27,6 +27,7 @@ namespace SachidaPaudel
 
 
 
+
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
             builder.Logging.AddDebug();

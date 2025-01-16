@@ -2,6 +2,7 @@
 @inject NavigationManager Navigation
 @inject SachidaPaudel.Service.UserService.IUserService UserService
 @inject SachidaPaudel.Utils.CsvHelper CsvHelper
+@inject ISnackbar Snackbar
 
 @using SachidaPaudel.Utils
 
@@ -87,7 +88,8 @@
             if (user != null)
             {
                 UserService.UpdateLoginStatus(true); // Set IsLoggedIn to true
-                                                     // If setup is successful, navigate to the home page
+                Snackbar.Add("Successfully logged in!", Severity.Success); // Show success message
+                                                                           // If setup is successful, navigate to the home page
                 Navigation.NavigateTo("/");
             }
             else
@@ -103,3 +105,4 @@
         }
     }
 }
+

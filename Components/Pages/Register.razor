@@ -2,6 +2,7 @@
 @inject NavigationManager Navigation
 @inject SachidaPaudel.Service.UserService.IUserService UserService
 @inject SachidaPaudel.Utils.CsvHelper CsvHelper
+@inject ISnackbar Snackbar
 
 @using SachidaPaudel.Utils
 
@@ -41,7 +42,7 @@
             <!-- Error Message -->
             @if (!string.IsNullOrEmpty(errorMessage))
             {
-                <div class="alert alert-danger mt-3 text-center">@errorMessage</div>
+                    <div class="alert alert-danger mt-3 text-center">@errorMessage</div>
             }
 
             <!-- Login Link -->
@@ -102,6 +103,9 @@
             // Register the user using UserService
             UserService.RegisterUser(newUser);
 
+            // Show success message
+            Snackbar.Add("Successfully registered!", Severity.Success);
+
             // Redirect to the login page after successful registration
             Navigation.NavigateTo("/login");
         }
@@ -112,3 +116,4 @@
         }
     }
 }
+

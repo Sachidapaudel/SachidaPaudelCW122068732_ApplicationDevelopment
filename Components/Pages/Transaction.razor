@@ -4,6 +4,7 @@
 @using SachidaPaudel.Service.DebtsService
 @inject ITransactionService TransactionService
 @inject IDebtsService DebtsService
+@inject ISnackbar Snackbar
 
 <h2 class="text-center my-4 text-success">Transaction Manager</h2>
 
@@ -315,7 +316,6 @@
     </div>
 }
 
-
 @code {
     private List<SachidaPaudel.Models.Transaction> transactions = new List<SachidaPaudel.Models.Transaction>();
     private SachidaPaudel.Models.Transaction newTransaction = new SachidaPaudel.Models.Transaction() { TransactionDate = DateTime.Now };
@@ -381,7 +381,6 @@
         return !string.IsNullOrEmpty(transaction.TransactionTitle) && transaction.TransactionAmount > 0;
     }
 
-
     private async Task AddTransaction()
     {
         // Combine selected existing tag and custom tags
@@ -429,9 +428,8 @@
             customTagInput = "";
             CloseAddTransactionModal();
 
-            // Set success message
-            // successMessage = "Transaction successfully added!";
-            // await ClearSuccessMessageAfterDelay();
+            // Show success message
+            Snackbar.Add("Transaction successfully added!", Severity.Success);
         }
         catch (InvalidOperationException ex)
         {
@@ -456,9 +454,8 @@
             newDebt = new SachidaPaudel.Models.Debts() { DebtDueDate = DateTime.Now };
             CloseAddTransactionModal();
 
-            // Set success message
-            // successMessage = "Debt successfully added!";
-            // await ClearSuccessMessageAfterDelay();
+            // Show success message
+            Snackbar.Add("Debt successfully added!", Severity.Success);
         }
         catch (InvalidOperationException ex)
         {
@@ -485,9 +482,8 @@
             // Close the edit modal
             CloseEditModal();
 
-            // Set success message
-            // successMessage = "Transaction successfully updated!";
-            // await ClearSuccessMessageAfterDelay();
+            // Show success message
+            Snackbar.Add("Transaction successfully updated!", Severity.Success);
         }
         catch (InvalidOperationException ex)
         {
@@ -498,12 +494,23 @@
 
     private async Task DeleteTransaction(int transactionId)
     {
-        await TransactionService.DeleteTransactionAsync(transactionId);
+        try
+        {
+            await TransactionService.DeleteTransactionAsync(transactionId);
 
-        // Refresh the transaction list and user balance
-        transactions = await TransactionService.GetTransactionsAsync();
-        userBalance = await TransactionService.GetUserBalanceAsync();
-        pendingDebts = await TransactionService.GetPendingDebtsAsync(); // Refresh pending debts
+            // Refresh the transaction list and user balance
+            transactions = await TransactionService.GetTransactionsAsync();
+            userBalance = await TransactionService.GetUserBalanceAsync();
+            pendingDebts = await TransactionService.GetPendingDebtsAsync(); // Refresh pending debts
+
+            // Show success message
+            Snackbar.Add("Transaction successfully deleted!", Severity.Success);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Handle exception or display error message
+            Console.WriteLine(ex.Message);
+        }
     }
 
     private void EditTransaction(SachidaPaudel.Models.Transaction transaction)
@@ -554,4 +561,3 @@
         public bool Ascending { get; set; } = true;
     }
 }
-

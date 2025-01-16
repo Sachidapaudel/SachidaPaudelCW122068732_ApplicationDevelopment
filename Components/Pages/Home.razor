@@ -6,6 +6,13 @@
 @inject ITransactionService TransactionService
 @inject IDebtsService DebtService
 
+<style>
+    .card-hover:hover {
+        transform: scale(1.05);
+        transition: transform 0.3s ease;
+    }
+</style>
+
 <div class="container mt-5">
     <!-- Dashboard Header -->
     <div class="text-center mb-4">
@@ -29,42 +36,11 @@
         </div>
     </div>
 
-    <!-- Summary Cards -->
+
+    <!-- Highest/Lowest Inflow, Outflow, and Debt -->
     <div class="row text-center mb-5">
         <div class="col-md-4 mb-4">
-            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754;">
-                <div class="card-body">
-                    <h5 class="card-title" style="color: #198754;">Total Cash Inflows</h5>
-                    <h3 class="fw-bold" style="color: #198754;">@totalCashInflows.ToString("C")</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754;">
-                <div class="card-body">
-                    <h5 class="card-title" style="color: #198754;">Total Cash Outflows</h5>
-                    <h3 class="fw-bold text-danger">@totalCashOutflows.ToString("C")</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754;">
-                <div class="card-body">
-                    <h5 class="card-title" style="color: #198754;">Remaining Debts</h5>
-                    <h3 class="fw-bold text-warning">@remainingDebts.ToString("C")</h3>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-        </div>
-
-
-    <!-- Highest/Lowest Inflow and Outflow -->
-    <div class="row text-center mb-5">
-        <div class="col-md-6 mb-4">
-            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754;">
+            <div class="card shadow border-0 h-100 card-hover" style="border-top: 4px solid #198754;">
                 <div class="card-body">
                     <h5 class="card-title" style="color: #198754;">Highest Inflow</h5>
                     @if (highestInflow != null)
@@ -80,8 +56,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6 mb-4">
-            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754;">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow border-0 h-100 card-hover" style="border-top: 4px solid #198754;">
                 <div class="card-body">
                     <h5 class="card-title" style="color: #198754;">Highest Outflow</h5>
                     @if (highestOutflow != null)
@@ -97,20 +73,60 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow border-0 h-100 card-hover" style="border-top: 4px solid #198754;">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: #198754;">Highest Debt</h5>
+                    @if (highestDebt != null)
+                    {
+                        <h3 class="fw-bold text-warning">@highestDebt.DebtAmount.ToString("C")</h3>
+                        <p class="text-muted">@highestDebt.DebtSource</p>
+                        <p class="text-muted">@highestDebt.DebtDueDate.ToString("d")</p>
+                    }
+                    else
+                    {
+                        <h3 class="fw-bold text-muted">N/A</h3>
+                    }
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Debts Section -->
     <div class="row mb-5">
         <div class="col-md-6">
-            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754;">
-                <div class="card-body">
-                    <h5 class="card-title" style="color: #198754;">Cleared Debts</h5>
-                    <h4 class="fw-bold" style="color: #198754;">@clearedDebts.ToString("C")</h4>
+            <div class="card shadow border-0 h-100"
+                 style="
+            border-top: 5px solid #198754;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 10px;
+        "
+                 onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0px 6px 20px rgba(0, 0, 0, 0.2)';"
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0px 4px 15px rgba(0, 0, 0, 0.1)';">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold mb-3"
+                        style="color: #198754; font-size: 1rem;">
+                        Cleared Debts
+                    </h5>
+                    <h4 class="fw-bold mb-4"
+                        style="color: #198754; font-size: 1.5rem;">
+                        @clearedDebts.ToString("C")
+                    </h4>
+                    <div class="divider my-3" style="height: 2px; background-color: #198754; opacity: 0.7;"></div>
+                    <h5 class="card-title fw-bold mb-3"
+                        style="color: #198754; font-size: 1rem;">
+                        Pending Debts
+                    </h5>
+                    <h4 class="fw-bold"
+                        style="color:  #FF0000; font-size: 1.5rem;">
+                        @pendingDebts.Sum(d => d.DebtAmount).ToString("C")
+                    </h4>
                 </div>
             </div>
         </div>
+
         <div class="col-md-6">
-            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754; background-color: #eaf5e0;">
+            <div class="card shadow border-0 h-100 card-hover" style="border-top: 4px solid #198754; background-color: #eaf5e0;">
                 <div class="card-body">
                     <h5 class="card-title" style="color: #198754;">Pending Debts</h5>
                     <ul class="list-group list-group-flush">
@@ -118,7 +134,11 @@
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center"
                                 style="background-color: #f0f8f1; border-left: 4px solid #198754;">
-                                @debt.DebtSource
+                                <div>
+                                    @debt.DebtSource
+                                    <br />
+                                    <small class="text-muted">@debt.DebtDueDate.ToString("d")</small>
+                                </div>
                                 <span class="badge" style="background-color: #198754;">@debt.DebtAmount.ToString("C")</span>
                             </li>
                         }
@@ -126,14 +146,12 @@
                 </div>
             </div>
         </div>
-
     </div>
-
 
     <!-- Transactions Section -->
     <div class="row">
         <div class="col-md-6 mb-4">
-            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754;">
+            <div class="card shadow border-0 h-100 card-hover" style="border-top: 4px solid #198754;">
                 <div class="card-body">
                     <h5 class="card-title" style="color: #198754;">Top 5 Highest Transactions</h5>
                     <ul class="list-group list-group-flush">
@@ -153,7 +171,7 @@
             </div>
         </div>
         <div class="col-md-6 mb-4">
-            <div class="card shadow border-0 h-100" style="border-top: 4px solid #198754;">
+            <div class="card shadow border-0 h-100 card-hover" style="border-top: 4px solid #198754;">
                 <div class="card-body">
                     <h5 class="card-title" style="color: #198754;">Top 5 Lowest Transactions</h5>
                     <ul class="list-group list-group-flush">
@@ -173,55 +191,86 @@
             </div>
         </div>
     </div>
-<style>
-    .card {
-        transition: transform 0.2s;
-    }
 
-        .card:hover {
-            transform: translateY(-5px);
-        }
+    <!-- Summary Card -->
+    <div class="row text-center mb-5">
+        <div class="col-md-12 mb-4">
+            <div class="card shadow border-0 h-100 card-hover"
+                 style="
+                border-top: 4px solid #198754;
+                transition: transform 0.2s, box-shadow 0.2s;
+            "
+                 onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0px 4px 15px rgba(0, 0, 0, 0.2)';"
+                 onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0px 2px 10px rgba(0, 0, 0, 0.1)';">
+                <div class="card-body">
+                    <h5 class="card-title text-success fw-bold">Summary</h5>
+                    <p class="mb-2">
+                        Total Number of Transactions:
+                        <span class="fw-bold text-dark">@totalTransactions</span>
+                    </p>
+                    <p class="mb-2">
+                        Total Number of Credits:
+                        <span class="fw-bold text-primary">@totalCredits</span>
+                    </p>
+                    <p class="mb-2">
+                        Total Number of Debits:
+                        <span class="fw-bold text-danger">@totalDebits</span>
+                    </p>
+                    <p class="mb-2">
+                        Total Number of Debts:
+                        <span class="fw-bold text-warning">@totalDebtsCount</span>
+                    </p>
+                    <p class="mb-0">
+                        Net Transactions (Inflows + Debts - Outflows):
+                        <span class="fw-bold text-info">@netTransactions.ToString("C")</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    .badge {
-        font-size: 0.9em;
-        padding: 8px 12px;
-    }
-</style>
 
-
-<!-- Pie Charts for Inflow/Outflow and Cleared/Remaining Debt -->
-<div class="row text-center mb-5">
-    <MudPaper Class="pa-4">
-        <MudChart ChartType="ChartType.Pie" InputData="@data" InputLabels="@labels" Width="300px" Height="300px" />
-    </MudPaper>
-
-    <MudPaper Class="pa-4 mt-2 d-flex justify-center">
-        <MudButton OnClick="RandomizeData" Variant="Variant.Filled" Class="mx-4">Randomize</MudButton>
-    </MudPaper>
-
-
-    @code {
-        private double[] data = { 60, 40 };  // 60% inflow, 40% outflow
-        private string[] labels = { "Inflows", "Outflows" };
-
-        private Random random = new Random();
-
-        // Randomize inflow and outflow data for demonstration
-        void RandomizeData()
-        {
-            data[0] = random.NextDouble() * 100;  // Inflow
-            data[1] = 100 - data[0];  // Outflow (remaining percentage)
-            StateHasChanged();  // Trigger UI update
-        }
-    }
+    <!-- Pie Charts for Inflow/Outflow and Cleared/Remaining Debt -->
+    <div class="row text-center mb-5">
+        <MudGrid>
+            <MudItem xs="6">
+                <MudPaper Class="pa-4">
+                    <MudChart ChartType="ChartType.Pie" InputData="@data" InputLabels="@labels" Width="100%" Height="350px" />
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="6">
+                <MudPaper Class="pa-4">
+                    <MudChart ChartType="ChartType.Line" ChartSeries="@debtSeries" XAxisLabels="@XAxisLabels" Width="100%" Height="350px" ChartOptions="@lineChartOptions" />
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </div>
 </div>
 
 @code {
+    private double[] data = { 60, 40 };  // 60% inflow, 40% outflow
+    private string[] labels = { "Inflows", "Outflows" };
+
+    private Random random = new Random();
+
+    // Randomize inflow and outflow data for demonstration
+    void RandomizeData()
+    {
+        data[0] = random.NextDouble() * 100;  // Inflow
+        data[1] = 100 - data[0];  // Outflow (remaining percentage)
+        StateHasChanged();  // Trigger UI update
+    }
+
     private decimal totalCashInflows;
     private decimal totalCashOutflows;
     private decimal totalDebts;
     private decimal clearedDebts;
     private decimal remainingDebts;
+    private int totalTransactions; // Added this line
+    private int totalCredits; // Added this line
+    private int totalDebits; // Added this line
+    private int totalDebtsCount; // Added this line
+    private decimal netTransactions; // Added this line
     private List<SachidaPaudel.Models.Debts> pendingDebts = new List<SachidaPaudel.Models.Debts>();
     private List<SachidaPaudel.Models.Transaction> topHighestTransactions = new List<SachidaPaudel.Models.Transaction>();
     private List<SachidaPaudel.Models.Transaction> topLowestTransactions = new List<SachidaPaudel.Models.Transaction>();
@@ -229,11 +278,22 @@
     private SachidaPaudel.Models.Transaction? highestOutflow;
     private SachidaPaudel.Models.Transaction? lowestInflow;
     private SachidaPaudel.Models.Transaction? lowestOutflow;
+    private SachidaPaudel.Models.Debts? highestDebt; // Added this line
     private SearchCriteria searchCriteria = new SearchCriteria();
     private List<decimal> inflowOutflowData = new List<decimal>();
     private List<string> inflowOutflowLabels = new List<string> { "Inflow", "Outflow" };
     private List<decimal> debtData = new List<decimal>();
     private List<string> debtLabels = new List<string> { "Cleared Debt", "Remaining Debt" };
+
+    private ChartOptions lineChartOptions = new ChartOptions { LineStrokeWidth = 3 };
+
+    private List<ChartSeries> debtSeries = new List<ChartSeries>
+    {
+        new ChartSeries { Name = "Cleared Debts", Data = new double[9] },
+        new ChartSeries { Name = "Pending Debts", Data = new double[9] }
+    };
+
+    private string[] XAxisLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep" };
 
     protected override async Task OnInitializedAsync()
     {
@@ -259,7 +319,7 @@
         totalDebts = debts.Sum(d => d.DebtAmount);
         clearedDebts = debts.Where(d => d.IsCleared).Sum(d => d.DebtAmount);
         remainingDebts = totalDebts - clearedDebts;
-        pendingDebts = debts.Where(d => !d.IsCleared).ToList(); // Ensure pending debts are correctly filtered
+        pendingDebts = debts.Where(d => !d.IsCleared && d.DebtDueDate >= searchCriteria.StartDate && d.DebtDueDate <= searchCriteria.EndDate).ToList(); // Filter pending debts based on date range
 
         // Include cleared debts in the outflow calculation
         totalCashOutflows += clearedDebts;
@@ -271,10 +331,24 @@
         highestOutflow = transactions.Where(t => t.TransactionTransactionType == TransactionType.Debit).OrderByDescending(t => t.TransactionAmount).FirstOrDefault();
         lowestInflow = transactions.Where(t => t.TransactionTransactionType == TransactionType.Credit).OrderBy(t => t.TransactionAmount).FirstOrDefault();
         lowestOutflow = transactions.Where(t => t.TransactionTransactionType == TransactionType.Debit).OrderBy(t => t.TransactionAmount).FirstOrDefault();
+        highestDebt = debts.OrderByDescending(d => d.DebtAmount).FirstOrDefault(); // Added this line
+
+        // Calculate total number of transactions, credits, debits, debts, and net transactions
+        totalTransactions = transactions.Count + debts.Count;
+        totalCredits = transactions.Count(t => t.TransactionTransactionType == TransactionType.Credit);
+        totalDebits = transactions.Count(t => t.TransactionTransactionType == TransactionType.Debit);
+        totalDebtsCount = debts.Count;
+        netTransactions = totalCashInflows + totalDebts - totalCashOutflows;
 
         // Update pie chart data
         inflowOutflowData = new List<decimal> { totalCashInflows, totalCashOutflows };
         debtData = new List<decimal> { clearedDebts, remainingDebts };
+
+        // Update line chart data for debts
+        debtSeries[0].Data = new double[] { (double)clearedDebts, 0, 0, 0, 0, 0, 0, 0, 0 }; // Cleared debts
+        debtSeries[1].Data = new double[] { (double)remainingDebts, 0, 0, 0, 0, 0, 0, 0, 0 }; // Pending debts
+
+        StateHasChanged();
     }
 
     private void ClearFilters()
@@ -288,6 +362,5 @@
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
     }
-
 }
 
