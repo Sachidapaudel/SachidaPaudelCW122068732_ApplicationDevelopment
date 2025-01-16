@@ -64,14 +64,37 @@ namespace SachidaPaudel.Service.DebtsService
             }
         }
 
-
-        public async Task<List<Debts>> SearchDebtsAsync(string source, DateTime? startDate, DateTime? endDate)
+        public async Task<List<Debts>> SearchDebtsAsync(string source, DateTime? startDate, DateTime? endDate, string sortBy, bool ascending)
         {
-            // Simulate searching for debts
-            return await Task.Run(() => _debts.Where(d =>
-                (string.IsNullOrEmpty(source) || d.DebtSource.Contains(source, StringComparison.OrdinalIgnoreCase)) &&
-                (!startDate.HasValue || d.DebtDueDate >= startDate.Value) &&
-                (!endDate.HasValue || d.DebtDueDate <= endDate.Value)).ToList());
+            // Simulate async operation
+            await Task.Delay(100);
+
+            // Filter by source
+            var filteredDebts = _debts.AsQueryable();
+            if (!string.IsNullOrEmpty(source))
+            {
+                filteredDebts = filteredDebts.Where(d => d.DebtSource.Contains(source, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // Filter by date range
+            if (startDate.HasValue)
+            {
+                filteredDebts = filteredDebts.Where(d => d.DebtDueDate >= startDate.Value);
+            }
+            if (endDate.HasValue)
+            {
+                filteredDebts = filteredDebts.Where(d => d.DebtDueDate <= endDate.Value);
+            }
+
+            // Sort by specified field
+            filteredDebts = sortBy switch
+            {
+                "Source" => ascending ? filteredDebts.OrderBy(d => d.DebtSource) : filteredDebts.OrderByDescending(d => d.DebtSource),
+                "Amount" => ascending ? filteredDebts.OrderBy(d => d.DebtAmount) : filteredDebts.OrderByDescending(d => d.DebtAmount),
+                _ => ascending ? filteredDebts.OrderBy(d => d.DebtDueDate) : filteredDebts.OrderByDescending(d => d.DebtDueDate),
+            };
+
+            return await Task.FromResult(filteredDebts.ToList());
         }
 
         public async Task RemoveDebtAsync(int debtId)
@@ -118,4 +141,5 @@ namespace SachidaPaudel.Service.DebtsService
         }
     }
 }
+
 

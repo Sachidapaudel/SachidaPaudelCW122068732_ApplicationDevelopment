@@ -16,10 +16,10 @@
         border-color: #856404;
     }
 
-        .btn-outline-warning:hover {
-            background-color: #856404;
-            color: white;
-        }
+    .btn-outline-warning:hover {
+        background-color: #856404;
+        color: white;
+    }
 </style>
 
 <div class="container py-4">
@@ -29,6 +29,47 @@
     <!-- Display Total Debt Amount -->
     <div class="total-debt mb-4">
         <h4>Total Debt: @totalDebtAmount.ToString("C")</h4>
+    </div>
+
+    <!-- Search Debts Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-light text-dark">
+            <h5 class="mb-0">Search Debts</h5>
+        </div>
+        <div class="card-body">
+            <EditForm Model="searchCriteria" OnValidSubmit="SearchDebtsAsync">
+                <div class="row gy-2">
+                    <div class="col-md-3">
+                        <InputText @bind-Value="searchCriteria.Source" class="form-control" placeholder="Source" />
+                    </div>
+                    <div class="col-md-3">
+                        <InputDate @bind-Value="searchCriteria.StartDate" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <InputDate @bind-Value="searchCriteria.EndDate" class="form-control" />
+                    </div>
+                </div>
+                <div class="row gy-2 mt-2">
+                    <div class="col-md-3">
+                        <InputSelect @bind-Value="searchCriteria.SortBy" class="form-control">
+                            <option value="Date">Date</option>
+                            <option value="Source">Source</option>
+                            <option value="Amount">Amount</option>
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-3">
+                        <InputSelect @bind-Value="searchCriteria.Ascending" class="form-control">
+                            <option value="true">Ascending</option>
+                            <option value="false">Descending</option>
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-center">
+                        <button type="submit" class="btn btn-success me-2">Search</button>
+                        <button type="button" class="btn btn-secondary" @onclick="ClearSearchFilters">Clear</button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
     </div>
 
     <!-- Display All Debts -->
@@ -52,31 +93,31 @@
                     {
                         foreach (var debt in debts)
                         {
-                            <tr class="@(debt.IsCleared ? "" : "pending-debt")">
-                                <td>@debt.DebtSource</td>
-                                <td>@debt.DebtAmount.ToString("C")</td>
-                                <td>@debt.DebtDueDate.ToString("MM/dd/yyyy")</td>
-                                <td>
-                                    <span class="badge @(debt.IsCleared ? "bg-success" : "bg-warning")">
+                                    <tr class="@(debt.IsCleared ? "" : "pending-debt")">
+                                        <td>@debt.DebtSource</td>
+                                        <td>@debt.DebtAmount.ToString("C")</td>
+                                        <td>@debt.DebtDueDate.ToString("MM/dd/yyyy")</td>
+                                        <td>
+                                            <span class="badge @(debt.IsCleared ? "bg-success" : "bg-warning")">
                                         @(debt.IsCleared ? "Cleared" : "Pending")
-                                    </span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-outline-success btn-sm" @onclick="() => EditDebt(debt)">Edit</button>
-                                    <button class="btn btn-outline-danger btn-sm" @onclick="() => DeleteDebt(debt.DebtId)">Delete</button>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-outline-success btn-sm" @onclick="() => EditDebt(debt)">Edit</button>
+                                            <button class="btn btn-outline-danger btn-sm" @onclick="() => DeleteDebt(debt.DebtId)">Delete</button>
                                     @if (!debt.IsCleared)
                                     {
-                                        <button class="btn btn-outline-warning btn-sm" @onclick="() => ConfirmClearDebt(debt.DebtId)">Clear Now</button>
+                                                    <button class="btn btn-outline-warning btn-sm" @onclick="() => ConfirmClearDebt(debt.DebtId)">Clear Now</button>
                                     }
-                                </td>
-                            </tr>
+                                        </td>
+                                    </tr>
                         }
                     }
                     else
                     {
-                        <tr>
-                            <td colspan="5" class="text-center text-muted">No debts available.</td>
-                        </tr>
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No debts available.</td>
+                            </tr>
                     }
                 </tbody>
             </table>
@@ -119,7 +160,7 @@
     <!-- Display Error Message -->
     @if (!string.IsNullOrEmpty(errorMessage))
     {
-        <div class="alert alert-danger">@errorMessage</div>
+            <div class="alert alert-danger">@errorMessage</div>
     }
 </div>
 
@@ -129,6 +170,7 @@
     private decimal totalDebtAmount;
     private bool isEditMode = false;
     private string? errorMessage;
+    private SearchCriteria searchCriteria = new SearchCriteria();
 
     protected override async Task OnInitializedAsync()
     {
@@ -200,4 +242,32 @@
             }
         }
     }
+
+    private async Task SearchDebtsAsync()
+    {
+        debts = await DebtsService.SearchDebtsAsync(
+            searchCriteria.Source,
+            searchCriteria.StartDate,
+            searchCriteria.EndDate,
+            searchCriteria.SortBy,
+            searchCriteria.Ascending
+        );
+    }
+
+    private async Task ClearSearchFilters()
+    {
+        searchCriteria = new SearchCriteria();
+        await LoadDebtsAsync();
+    }
+
+    private class SearchCriteria
+    {
+        public string Source { get; set; } = string.Empty;
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public string SortBy { get; set; } = "Date";
+        public bool Ascending { get; set; } = true;
+    }
 }
+
+
