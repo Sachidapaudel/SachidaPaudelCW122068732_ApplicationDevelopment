@@ -36,6 +36,33 @@
         </div>
     </div>
 
+    <!-- Total Cash Inflow, Outflow, and Debt -->
+    <div class="row text-center mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow border-0 h-100 card-hover" style="border-top: 4px solid #198754;">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: #198754;">Total Cash Inflow</h5>
+                    <h3 class="fw-bold" style="color: #198754;">@totalCashInflows.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow border-0 h-100 card-hover" style="border-top: 4px solid #198754;">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: #198754;">Total Cash Outflow</h5>
+                    <h3 class="fw-bold text-danger">@totalCashOutflows.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow border-0 h-100 card-hover" style="border-top: 4px solid #198754;">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: #198754;">Total Debt</h5>
+                    <h3 class="fw-bold text-warning">@totalDebts.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Highest/Lowest Inflow, Outflow, and Debt -->
     <div class="row text-center mb-5">
@@ -220,6 +247,10 @@
                         Total Number of Debts:
                         <span class="fw-bold text-warning">@totalDebtsCount</span>
                     </p>
+                    <p class="mb-2">
+                        Total Number of Pending Debts:
+                        <span class="fw-bold text-danger">@totalPendingDebts</span>
+                    </p>
                     <p class="mb-0">
                         Net Transactions (Inflows + Debts - Outflows):
                         <span class="fw-bold text-info">@netTransactions.ToString("C")</span>
@@ -228,7 +259,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- Pie Charts for Inflow/Outflow and Cleared/Remaining Debt -->
     <div class="row text-center mb-5">
@@ -266,11 +296,12 @@
     private decimal totalDebts;
     private decimal clearedDebts;
     private decimal remainingDebts;
-    private int totalTransactions; // Added this line
-    private int totalCredits; // Added this line
-    private int totalDebits; // Added this line
-    private int totalDebtsCount; // Added this line
-    private decimal netTransactions; // Added this line
+    private int totalTransactions; 
+    private int totalCredits; 
+    private int totalDebits; 
+    private int totalDebtsCount; 
+    private int totalPendingDebts;
+    private decimal netTransactions; 
     private List<SachidaPaudel.Models.Debts> pendingDebts = new List<SachidaPaudel.Models.Debts>();
     private List<SachidaPaudel.Models.Transaction> topHighestTransactions = new List<SachidaPaudel.Models.Transaction>();
     private List<SachidaPaudel.Models.Transaction> topLowestTransactions = new List<SachidaPaudel.Models.Transaction>();
@@ -278,7 +309,7 @@
     private SachidaPaudel.Models.Transaction? highestOutflow;
     private SachidaPaudel.Models.Transaction? lowestInflow;
     private SachidaPaudel.Models.Transaction? lowestOutflow;
-    private SachidaPaudel.Models.Debts? highestDebt; // Added this line
+    private SachidaPaudel.Models.Debts? highestDebt;
     private SearchCriteria searchCriteria = new SearchCriteria();
     private List<decimal> inflowOutflowData = new List<decimal>();
     private List<string> inflowOutflowLabels = new List<string> { "Inflow", "Outflow" };
@@ -331,13 +362,14 @@
         highestOutflow = transactions.Where(t => t.TransactionTransactionType == TransactionType.Debit).OrderByDescending(t => t.TransactionAmount).FirstOrDefault();
         lowestInflow = transactions.Where(t => t.TransactionTransactionType == TransactionType.Credit).OrderBy(t => t.TransactionAmount).FirstOrDefault();
         lowestOutflow = transactions.Where(t => t.TransactionTransactionType == TransactionType.Debit).OrderBy(t => t.TransactionAmount).FirstOrDefault();
-        highestDebt = debts.OrderByDescending(d => d.DebtAmount).FirstOrDefault(); // Added this line
+        highestDebt = debts.OrderByDescending(d => d.DebtAmount).FirstOrDefault();
 
         // Calculate total number of transactions, credits, debits, debts, and net transactions
         totalTransactions = transactions.Count + debts.Count;
         totalCredits = transactions.Count(t => t.TransactionTransactionType == TransactionType.Credit);
         totalDebits = transactions.Count(t => t.TransactionTransactionType == TransactionType.Debit);
         totalDebtsCount = debts.Count;
+        totalPendingDebts = pendingDebts.Count; // Added this line
         netTransactions = totalCashInflows + totalDebts - totalCashOutflows;
 
         // Update pie chart data
@@ -351,10 +383,10 @@
         StateHasChanged();
     }
 
-    private void ClearFilters()
+    private async Task ClearFilters()
     {
         SetDefaultDates();
-        LoadDashboardData();
+        await LoadDashboardData();
     }
 
     private class SearchCriteria
@@ -362,5 +394,8 @@
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
     }
-}
+    
+    }
+    }
+
 
